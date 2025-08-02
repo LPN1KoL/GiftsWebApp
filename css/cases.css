@@ -1,0 +1,135 @@
+/*------- Базовые стили для всех страниц -------*/
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+.nunito-<uniquifier> {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+* {
+    font-family: "Nunito", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+}
+
+html, body{
+    padding: 0px;
+    margin: 0px;
+}
+
+.main{
+    height: 100vh;
+    width: 100vw;
+    background-color: #202b39;
+    display: grid:
+    grid-template-columns: 100%;
+    z-index: -100;
+}
+
+.content{
+    width: 96vw;
+    padding: 0 2vw;
+    padding-top: 0.5vh;
+    height: 91.5vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.slider{
+    background-color: #2e3b4b;
+    min-height: 8vh;
+}
+
+.sections{
+    height: calc(100% - 1.4vh);
+    width: calc(100% - 4vw);
+    padding: 0.7vh 2vw;
+    display: grid;
+    grid-template-columns: 33% 34% 33%;
+}
+
+.section{
+    display: grid;
+    grid-template-columns: 100%;
+    align-content: center;
+    justify-items: center;
+    color: #aec0d6;
+    height: 100%;
+}
+
+.active{
+    color: #3281dc;
+}
+
+.span-sec{
+    font-size: 34px;
+}
+
+.section > i{
+    font-size: 70px;
+}
+
+.sections > a{
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+}
+
+/*------- Стили страницы -------*/
+
+
+h1{
+    color: #cddbeb;
+    font-size: 2vh;
+    margin: 1vh 0;
+}
+
+.cases-list{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 100%;
+    margin-bottom: 1vh;
+}
+
+.case{
+    background-color: #2e3b4b;
+    border-radius: 20px;
+    margin: 0.5vh 1vw;
+    height: 25vh;
+    flex-shrink: 0;
+}
+
+h3{
+    text-align: center;
+    color: #cddbeb;
+    margin: 1vh 0;
+    font-size: 1.5vh;
+}
+
+.tgstar{
+    height: 2vh;
+}
+
+.case-img{
+    margin-top: 1vh;
+    display: flex;
+    justify-content: center;
+}
+
+.cimg{
+    height: 15vh;
+}
+
+.case-price{
+    margin-top: 1vh;
+    display: flex;
+    justify-content: center;
+}
+
+.price > span{
+    color: #cddbeb;
+    font-size: 2vh;
+}

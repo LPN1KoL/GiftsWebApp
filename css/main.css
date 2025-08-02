@@ -1,0 +1,171 @@
+/*------- Базовые стили для всех страниц -------*/
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+
+.nunito-<uniquifier> {
+  font-family: "Nunito", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
+
+* {
+    font-family: "Nunito", sans-serif;
+    font-weight: 600;
+    font-style: normal;
+}
+
+html, body{
+    padding: 0px;
+    margin: 0px;
+}
+
+.main{
+    height: 100vh;
+    width: 100vw;
+    background-color: #202b39;
+    display: grid:
+    grid-template-columns: 100%;
+    z-index: -100;
+}
+
+.content{
+    width: 96vw;
+    padding: 0 2vw;
+    padding-top: 0.5vh;
+    height: 91.5vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.slider{
+    background-color: #2e3b4b;
+    min-height: 8vh;
+}
+
+.sections{
+    height: calc(100% - 1.4vh);
+    width: calc(100% - 4vw);
+    padding: 0.7vh 2vw;
+    display: grid;
+    grid-template-columns: 33% 34% 33%;
+}
+
+.section{
+    display: grid;
+    grid-template-columns: 100%;
+    align-content: center;
+    justify-items: center;
+    color: #aec0d6;
+    height: 100%;
+}
+
+.active{
+    color: #3281dc;
+}
+
+.span-sec{
+    font-size: 34px;
+}
+
+.section > i{
+    font-size: 70px;
+}
+
+.sections > a{
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+}
+
+/*------- Стили страницы -------*/
+
+#case_name{
+    text-align: center;
+    color: #cddbeb;
+    margin: 2vh 0;
+    font-size: 3vh;
+    font-weight: 700;
+}
+
+.case{
+    width: 100%;
+    height: 25vh;
+    margin: 1vh 0;
+}
+
+.window{
+    width: calc(100% - 8px);
+    height: 100%;
+    border-radius: 35px;
+    border: 4px solid #3281dc;
+    display: flex;
+    overflow: hidden;
+}
+
+#open_case{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 1vh 2vw;
+    background-color: #3281dc;
+    color: white;
+    font-size: 2vh;
+    border: none;
+    border-radius: 25px;
+    margin-bottom: 4vh;
+}
+
+
+.line{
+    position: absolute;
+    height: 25vh;
+    width: 4px;
+    background-color: #3281dc;
+    left: calc(50vw - 2px);
+    z-index: 100;
+}
+
+#for-items{
+    text-align: start;
+    color: #cddbeb;
+    margin: 2vh 0;
+    font-size: 2vh;
+    font-weight: 700;
+    margin: 0 2vw;
+}
+
+.slide{
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    position: relative;
+    left: -12vw;
+}
+
+.card{
+    background-color: #2e3b4b;
+    border-radius: 20px;
+    margin: 1vh 2vw;
+    height: calc(100% - 2vh);
+    width: 35vw;
+    flex-shrink: 0;
+}
+
+.slow-move{
+    transition: all 7s cubic-bezier(0.2, 0, 0.58, 1);
+}
+
+.fast-move{
+    transition: none;
+}
+
+.list-items{
+    display: flex;
+    flex-direction: row;
+    height: 25vh;
+    width: 100%;
+    overflow-x: scroll;
+}
+
+
