@@ -36,10 +36,9 @@ function renderSlider(giftsArr, highlightIndex = null) {
 
 async function loadCaseData() {
   const params = new URLSearchParams(window.location.search);
-  const caseId = params.get('id');
+  caseId = params.get('id');
   if (!caseId) {
-    alert('Кейс не выбран');
-    return;
+    caseId = "basic1"
   }
 
   try {
