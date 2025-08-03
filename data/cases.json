@@ -1,0 +1,45 @@
+[
+  {
+    "id": "basic1",
+    "category": "basic",
+    "name": "Ненавижу ебаных лудоманов",
+    "price": 6690,
+    "logo": "/media/1.png",
+    "gifts": [
+      {
+        "link": "https://example.com/gift1",
+        "img": "/media/1.png",
+        "chance": 0.3
+      },
+      {
+        "link": "https://example.com/gift2",
+        "img": "/media/2.png",
+        "chance": 0.7
+      }
+    ]
+  },
+  {
+    "id": "allin1",
+    "category": "allin",
+    "name": "ЫЫЫЫ, УУУ, Я сЕйЧаС ОтЫгРаЮсЬ!!!",
+    "price": 99999,
+    "logo": "/media/img.png",
+    "gifts": [
+      {
+        "link": "https://example.com/gift1",
+        "img": "/media/1.png",
+        "chance": 0.5
+      },
+      {
+        "link": "https://example.com/gift2",
+        "img": "/media/2.png",
+        "chance": 0.4
+      },
+      {
+        "link": "https://example.com/gift3",
+        "img": "/media/img.png",
+        "chance": 0.1
+      }
+    ]
+  }
+]
