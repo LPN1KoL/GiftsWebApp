@@ -6,6 +6,7 @@ import aiosqlite
 from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.types import Message
 
+
 API_TOKEN = "token"
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
