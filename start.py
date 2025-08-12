@@ -27,6 +27,7 @@ def handle_get_balance(data):
     user_id = data.get("user_id")
     if not user_id:
         return 400, {"error": "Missing 'user_id'"}
+
     balance = get_user_balance_sync(user_id)
     return 200, {"balance": balance}
     
@@ -35,9 +36,11 @@ def handle_open_case(data):
     case_id = data.get("case_id")
     if not user_id:
         return 400, {"error": "Missing 'user_id'"}
+
     result = try_open_case_sync(user_id, case_id)
     if "error" in result:
         return 400, {"error": result["error"]}
+
     return 200, result
 
 def handle_get_profile(data):
@@ -115,6 +118,7 @@ def run_server():
             raise FileNotFoundError("SSL-сертификаты не найдены, fallback на HTTP")
 
         httpd = HTTPServer((HOST, HTTPS_PORT), MyHandler)
+
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
         httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
@@ -123,7 +127,6 @@ def run_server():
         print("❌ Не удалось запустить HTTPS:", e)
         httpd = HTTPServer((HOST, HTTP_PORT), MyHandler)
         print(f"Сервер fallback на http://{HOST}:{HTTP_PORT}")
-
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
