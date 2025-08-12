@@ -40,15 +40,30 @@ def handle_open_case(data):
         return 400, {"error": result["error"]}
     return 200, result
 
+def handle_get_profile(data):
+    user_id = data.get("user_id")
+    if not user_id:
+        return 400, {"error": "Missing 'user_id'"}
+
+    try:
+        profile_data = get_user_profile_data_sync(user_id)
+        # Ожидаем, что get_user_profile_data_sync вернёт что-то типа:
+        # { "username": "MyNick", "balance": 12345 }
+        return 200, {
+            "balance": profile_data.get("balance", 0),
+            "username": profile_data.get("username", "unknown")
+        }
+    except Exception as e:
+        print(f"Ошибка получения профиля: {e}")
+        return 500, {"error": "Internal server error"}
+
+
 ROUTES = {
     "/api/plus": handle_plus,
-    "/api/get_balance": handle_get_balance,
+    "/api/get_profile": handle_get_profile,
     "/api/open_case": handle_open_case,
-    "/api/profile_info": lambda data: (
-        (400, {"error": "Missing user_id"}) if "user_id" not in data
-        else (200, get_user_profile_data_sync(data["user_id"]))
-    ),
 }
+
 
 # --- Обработчик HTTP ---
 class MyHandler(SimpleHTTPRequestHandler):
