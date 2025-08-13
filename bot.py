@@ -3,8 +3,10 @@ import json
 import random
 import ast
 import aiosqlite
+import os
 from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.types import Message
+
 
 API_TOKEN = "token"
 bot = Bot(token=API_TOKEN)
@@ -23,9 +25,9 @@ def try_open_case_sync(user_id, case_id):
     return asyncio.run(try_open_case(user_id, case_id))
 
 
-
 def get_user_profile_data_sync(user_id):
-    return "бля, я хз эта хуйня чё-то не работает, а у меня уже мозги не варят"
+    # Синхронная обёртка для асинхронной функции
+    return asyncio.run(get_user_profile_data(user_id))
 
 
 # --- ДЛЯ РАБОТЫ С БД ---
@@ -77,6 +79,13 @@ async def handle_start(message: Message):
     username = message.from_user.username or ""
     async with aiosqlite.connect("users.db") as db:
         await db.execute("INSERT OR IGNORE INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
+        await db.commit()
+    # Скачиваем и сохраняем аватарку
+    avatar_path = await download_user_avatar(user_id)
+    # Можно сохранить путь в БД, если нужно
+    async with aiosqlite.connect("users.db") as db:
+        await db.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
+        await db.execute("UPDATE users SET avatar = ? WHERE user_id = ?", (avatar_path, user_id))
         await db.commit()
     await message.answer("Вы зарегистрированы.")
 
@@ -164,6 +173,20 @@ async def queue_watcher():
 
 # --- ПРОЧЕЕ ---
 
+async def download_user_avatar(user_id):
+    photos = await bot.get_user_profile_photos(user_id, limit=1)
+    if photos.total_count > 0:
+        file_id = photos.photos[0][0].file_id
+        file = await bot.get_file(file_id)
+        file_path = file.file_path
+        # Скачиваем файл
+        destination_folder = "profile_picture"
+        os.makedirs(destination_folder, exist_ok=True)
+        destination_path = os.path.join(destination_folder, f"{user_id}.png")
+        await bot.download_file(file_path, destination_path)
+        return destination_path
+    return None
+
 async def get_user_avatar(user_id):
     photos = await bot.get_user_profile_photos(user_id, limit=1)
     if photos.total_count > 0:
@@ -174,18 +197,24 @@ async def get_user_avatar(user_id):
 
 async def get_user_profile_data(user_id):
     async with aiosqlite.connect("users.db") as db:
-        # Получаем username, balance, gifts
-        async with db.execute("SELECT username, balance, gifts FROM users WHERE user_id = ?", (user_id,)) as cursor:
+        async with db.execute("SELECT username, balance, gifts, avatar FROM users WHERE user_id = ?", (user_id,)) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return {"error": "Пользователь не найден"}
-            username, balance, gifts_json = row
-            gifts_ids = json.loads(gifts_json)
+            username, balance, gifts_json, avatar_path = row
+            # gifts_json может быть None, тогда дадим пустой список
+            if gifts_json:
+                try:
+                    gifts_ids = json.loads(gifts_json)
+                except Exception:
+                    gifts_ids = []
+            else:
+                gifts_ids = []
 
     # Загружаем все подарки из кейсов
     with open("data/cases.json", "r", encoding="utf-8") as f:
         cases = json.load(f)
-    
+
     gift_info = {}
     for case in cases:
         for gift in case["gifts"]:
@@ -193,12 +222,12 @@ async def get_user_profile_data(user_id):
 
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
 
-    avatar = await get_user_avatar(user_id)
+    avatar_file = avatar_path if avatar_path and os.path.isfile(avatar_path) else None
 
     return {
         "username": username,
         "balance": balance,
-        "avatar": avatar,
+        "avatar": avatar_file,
         "gifts": user_gifts
     }
 

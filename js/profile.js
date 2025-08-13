@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let user_id = "849307631";  // или Telegram.WebApp.initDataUnsafe.user.id
+    let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
 
     const plusButton = document.getElementById('main_button');
 
@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                const result = await sendApiRequest('/api/plus', { user_id });
+                await sendApiRequest('/api/plus', { user_id });
                 alert("Запрос успешно отправлен!");
             } catch (err) {
                 alert("Ошибка при отправке: " + err.message);
@@ -37,15 +37,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function updateBalance() {
+    async function updateProfile() {
         try {
-            const result = await sendApiRequest('/api/get_balance', { user_id });
+            const result = await sendApiRequest('/api/get_profile', { user_id });
+            
+            // Обновляем баланс
             const balanceElement = document.getElementById('balance_display');
             if (balanceElement) {
                 balanceElement.textContent = result.balance.toLocaleString();
             }
+
+            // Обновляем ник
+            const usernameElement = document.querySelector('.profile h1');
+            if (usernameElement) {
+                usernameElement.textContent = '@' + result.username;
+            }
+
+            // Обновляем аватар
+            const avatarElement = document.querySelector('.user-pic img');
+            if (avatarElement) {
+                avatarElement.src = `/profile_picture/${user_id}.png`;
+            }
+
         } catch (err) {
-            console.error("Ошибка при получении баланса:", err);
+            console.error("Ошибка при получении профиля:", err);
+
             const balanceElement = document.getElementById('balance_display');
             if (balanceElement) {
                 balanceElement.textContent = "Ошибка";
@@ -53,5 +69,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    updateBalance();
+    updateProfile();
 });

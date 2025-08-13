@@ -9,7 +9,7 @@ from bot import main as bot_main
 
 HOST = "0.0.0.0"
 HTTP_PORT = 8080
-HTTPS_PORT = 8443
+HTTPS_PORT = 443
 
 SSL_CERT = "/etc/letsencrypt/live/giftsapp.ddns.net/fullchain.pem"
 SSL_KEY = "/etc/letsencrypt/live/giftsapp.ddns.net/privkey.pem"
@@ -40,18 +40,33 @@ def handle_open_case(data):
     result = try_open_case_sync(user_id, case_id)
     if "error" in result:
         return 400, {"error": result["error"]}
-    
+
     return 200, result
+
+def handle_get_profile(data):
+    user_id = data.get("user_id")
+    if not user_id:
+        return 400, {"error": "Missing 'user_id'"}
+
+    try:
+        profile_data = get_user_profile_data_sync(user_id)
+        # Ожидаем, что get_user_profile_data_sync вернёт что-то типа:
+        # { "username": "MyNick", "balance": 12345 }
+        return 200, {
+            "balance": profile_data.get("balance", 0),
+            "username": profile_data.get("username", "unknown")
+        }
+    except Exception as e:
+        print(f"Ошибка получения профиля: {e}")
+        return 500, {"error": "Internal server error"}
+
 
 ROUTES = {
     "/api/plus": handle_plus,
-    "/api/get_balance": handle_get_balance,
+    "/api/get_profile": handle_get_profile,
     "/api/open_case": handle_open_case,
-    "/api/profile_info": lambda data: (
-        (400, {"error": "Missing user_id"}) if "user_id" not in data
-        else (200, get_user_profile_data_sync(data["user_id"]))
-    ),
 }
+
 
 # --- Обработчик HTTP ---
 class MyHandler(SimpleHTTPRequestHandler):
@@ -103,16 +118,15 @@ def run_server():
             raise FileNotFoundError("SSL-сертификаты не найдены, fallback на HTTP")
 
         httpd = HTTPServer((HOST, HTTPS_PORT), MyHandler)
-        httpd.socket = ssl.wrap_socket(httpd.socket,
-                                       certfile=SSL_CERT,
-                                       keyfile=SSL_KEY,
-                                       server_side=True)
+
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
+        httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
         print(f"Сервер ЗАПУЩЕН на https://{HOST}:{HTTPS_PORT}")
     except Exception as e:
-        print("Не удалось запустить HTTPS:", e)
+        print("❌ Не удалось запустить HTTPS:", e)
         httpd = HTTPServer((HOST, HTTP_PORT), MyHandler)
-        print(f"Сервер ЗАПУЩЕН на http://{HOST}:{HTTP_PORT}")
-
+        print(f"Сервер fallback на http://{HOST}:{HTTP_PORT}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
