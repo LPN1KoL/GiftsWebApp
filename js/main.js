@@ -5,6 +5,8 @@ const CARD_WIDTH = 35; // vw
 const CARD_MARGIN = 4;
 const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
 
+document.querySelector('.modal').classList.add('active');
+
 // Получаем user_id из Telegram WebApp или используем тестовый
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
 
@@ -116,6 +118,7 @@ async function loadCaseData() {
 }
 
 async function open_case() {
+
     const btn = document.getElementById('open_case');
     btn.setAttribute('disabled', '');
     btn.innerText = 'Открываем...';
