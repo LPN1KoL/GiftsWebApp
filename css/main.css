@@ -250,11 +250,6 @@ html, body{
     border-radius: 25px;
 }
 
-.price{
-
-}
-
-
 .gift-img{
     width: 100%;
     display: flex;
@@ -264,8 +259,8 @@ html, body{
 }
 
 .gimg{
-    height: 17vh;
-
+    aspect-ratio: 1 / 1;
+    justify-content: center;
 }
 
 

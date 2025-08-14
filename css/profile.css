@@ -508,11 +508,6 @@ h2.name{
     border-radius: 25px;
 }
 
-.price{
-
-}
-
-
 .gift-img{
     width: 100%;
     display: flex;
@@ -522,8 +517,8 @@ h2.name{
 }
 
 .gimg{
-    height: 17vh;
-
+    aspect-ratio: 1 / 1;
+    justify-content: center;
 }
 
 
