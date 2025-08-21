@@ -64,6 +64,7 @@ def handle_get_profile(data):
 ROUTES = {
     "/api/plus": handle_plus,
     "/api/get_profile": handle_get_profile,
+    "/api/get_balance": handle_get_balance,
     "/api/open_case": handle_open_case,
 }
 

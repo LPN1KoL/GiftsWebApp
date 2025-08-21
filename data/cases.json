@@ -2,23 +2,39 @@
   {
     "id": "basic1",
     "category": "basic",
-    "name": "Case 1",
-    "price": 6690,
+    "name": "Кейс 1",
+    "price": 0,
     "logo": "/media/1.png",
     "gifts": [
       {
-		"id": "skrepka",
-		"name": "SSS",
+        "id": "skrepka",
+        "name": "Скрепка",
         "link": "https://example.com/gift1",
         "img": "/media/1.png",
         "chance": 0.3
       },
       {
-		"id": "kalendar",
-		"name": "EEEE",
+        "id": "kalendar",
+        "name": "Календарь",
         "link": "https://example.com/gift2",
         "img": "/media/2.png",
         "chance": 0.7
+      }
+    ]
+  },
+  {
+    "id": "case-2",
+    "category": "basic",
+    "name": "КЕЙССС",
+    "price": 10,
+    "logo": "/media/gifts/gift-1-2467.png",
+    "gifts": [
+      {
+        "id": "gift-1-2467",
+        "name": "Пепе Паши",
+        "link": "https://t.me/nft/PlushPepe-858",
+        "img": "/media/gifts/gift-1-2467.png",
+        "chance": 0.49
       }
     ]
   }
