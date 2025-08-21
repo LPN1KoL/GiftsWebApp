@@ -5,8 +5,6 @@ const CARD_WIDTH = 35; // vw
 const CARD_MARGIN = 4;
 const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
 
-document.querySelector('.modal').classList.add('active');
-
 // Получаем user_id из Telegram WebApp или используем тестовый
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
 
@@ -169,7 +167,7 @@ async function open_case() {
         slider.style.transform = `translateX(${targetX}vw)`;
 
         if (wonGift) {
-            alert(`Поздравляем! Вы получили подарок!\n\nСсылка: ${wonGift.link}`);
+            showWinModal(wonGift);
         } else {
             alert('подарок не найден :');
         }
@@ -183,6 +181,21 @@ async function open_case() {
     btn.removeAttribute('disabled');
     btn.innerText = 'Открыть';
     btn.style.backgroundColor = '#3281dc';
+}
+
+function showWinModal(gift) {
+    const modal = document.querySelector('.modal');
+    const imgEl = modal.querySelector('.img img');
+    const countEl = modal.querySelector('.cnt');
+    const caseNameEl = document.getElementById('case_name');
+
+    if (gift) {
+        imgEl.src = gift.img;               // картинка подарка
+        countEl.textContent = gift.price || ""; // цена/очки (если есть)
+        caseNameEl.textContent = gift.name || "Ваш подарок";
+    }
+
+    modal.classList.add('active');
 }
 
 function sleep(ms) {
