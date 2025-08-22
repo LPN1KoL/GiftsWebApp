@@ -79,8 +79,6 @@ html, body{
     tap-highlight-color: transparent;
 }
 
-/*------- Стили страницы -------*/
-
 #case_name{
     text-align: center;
     color: #cddbeb;
@@ -96,10 +94,10 @@ html, body{
 }
 
 .window{
-    width: calc(100% - 8px);
+    width: calc(100% - 1vw);
     height: 100%;
-    border-radius: 35px;
-    border: 4px solid #3281dc;
+    border-radius: 6vw;
+    border: 0.5vw solid #3281dc;
     display: flex;
     overflow: hidden;
 }
@@ -112,7 +110,7 @@ html, body{
     color: white;
     font-size: 2vh;
     border: none;
-    border-radius: 25px;
+    border-radius: 3vw;
     margin-bottom: 4vh;
 }
 
@@ -120,9 +118,9 @@ html, body{
 .line{
     position: absolute;
     height: 25vh;
-    width: 4px;
+    width: 0.5vw;
     background-color: #3281dc;
-    left: calc(50vw - 2px);
+    left: calc(50vw - 0.25vw);
     z-index: 100;
 }
 
@@ -146,13 +144,13 @@ html, body{
 
 .card {
     background-color: #2e3b4b;
-    border-radius: 20px;
+    border-radius: 3vw;
     margin: 1vh 2vw;
     height: calc(100% - 2vh);
     width: 35vw;
     flex-shrink: 0;
     position: relative;
-    overflow: hidden; /* Важно для object-fit */
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -161,8 +159,8 @@ html, body{
 .card img {
     width: 100%;
     height: 100%;
-    object-fit: contain; /* или cover */
-    border-radius: 20px;
+    object-fit: contain;
+    border-radius: 3vw;
     display: block;
 }
 
@@ -185,7 +183,7 @@ html, body{
 
 .modal{
     position: fixed;
-    border-radius: 20px;
+    border-radius: 3vw;
     background-color: rgba(255, 255, 255, 0.15);
     -webkit-backdrop-filter: blur(80px);
     backdrop-filter: blur(80px);
@@ -201,17 +199,15 @@ html, body{
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
-    transform: scale(0.5); /* Начальный масштаб */
+    transform: scale(0.5);
     transition: transform 0.3s ease;
     box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
 }
 
-
-
 .modal.active {
     transform: scale(1);
     opacity: 1;
-    visibility: visible;/* Конечный масштаб */
+    visibility: visible;
 }
 
 .modal > .img{
@@ -236,7 +232,7 @@ html, body{
     color: white;
     font-size: 2vh;
     border: none;
-    border-radius: 25px;
+    border-radius: 3vw;
 }
 
 #close{
@@ -247,7 +243,7 @@ html, body{
     color: #cc3623;
     font-size: 2vh;
     border: 4px solid #cc3623;
-    border-radius: 25px;
+    border-radius: 3vw;
 }
 
 .gift-img{
