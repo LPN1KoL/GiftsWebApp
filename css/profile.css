@@ -78,10 +78,6 @@ html, body{
     tap-highlight-color: transparent;
 }
 
-/*------- Стили страницы -------*/
-
-
-
 .profile{
     width: 100%;
     min-height: 25vh;
@@ -111,7 +107,6 @@ html, body{
     font-weight: 700;
 }
 
-
 .user-balance{
     width: calc(100% - 10vw);
     height: 10vh;
@@ -120,7 +115,7 @@ html, body{
 
 .bal-card{
     background-color: #2e3b4b;
-    border-radius: 20px;
+    border-radius: 3vw;
     height: 100%;
     width: 100%;
     display: grid;
@@ -135,7 +130,7 @@ html, body{
 
 #main_button{
     background-color: #3281dc;
-    border-radius: 20px;
+    border-radius: 3vw;
     color: #cddbeb;
     width: 90%;
     height: 90%;
@@ -198,7 +193,7 @@ html, body{
 
 .quest{
     background-color: #2e3b4b;
-    border-radius: 20px;
+    border-radius: 3vw;
     height: 8vh;
     padding: 0.5vh 1vw;
     margin: 2vh 2vw;
@@ -230,7 +225,6 @@ html, body{
     grid-template-columns: 15% 85%;
 }
 
-
 .progress > h2{
     text-align: center;
     color: #cddbeb;
@@ -239,7 +233,6 @@ html, body{
     font-size: 1vh;
     font-weight: 500;
 }
-
 
 .barplace{
     width: 100%;
@@ -333,7 +326,6 @@ html, body{
     width: 100%;
 }
 
-
 .reward{
     padding-left: 2vw;
     width: calc(100% - 2vw);
@@ -342,11 +334,8 @@ html, body{
     grid-template-columns: 50% 50%;
     align-items: center;
     background-color: #3281dc;
-    border-radius: 20px;
+    border-radius: 3vw;
 }
-
-
-
 
 .cnt > h2{
     text-align: center;
@@ -356,20 +345,17 @@ html, body{
     font-weight: 500;
 }
 
-
-
 .card-list{
     padding: 0 1vw;
     width: calc(100% - 2vw);
     display: grid;
     grid-template-columns: 50% 50%;
     justify-items: center;
-
 }
 
 .card{
     background-color: #2e3b4b;
-    border-radius: 20px;
+    border-radius: 3vw;
     margin: 1vh 2vw;
     height: 25vh;
     width: 40vw;
@@ -379,7 +365,6 @@ html, body{
     flex-direction: column;
     justify-items: center;
 }
-
 
 .gift-img{
     width: 100%;
@@ -391,9 +376,7 @@ html, body{
 
 .gimg{
     height: 17vh;
-
 }
-
 
 h2.name{
     text-align: center;
@@ -402,7 +385,6 @@ h2.name{
     font-size: 2vh;
     font-weight: 500;
 }
-
 
 .price{
     width: 100%;
@@ -413,7 +395,6 @@ h2.name{
 
 .starr{
     height: 2vh;
-
 }
 
 .pc{
@@ -443,7 +424,7 @@ h2.name{
 
 .modal{
     position: fixed;
-    border-radius: 20px;
+    border-radius: 3vw;
     background-color: rgba(255, 255, 255, 0.15);
     -webkit-backdrop-filter: blur(80px);
     backdrop-filter: blur(80px);
@@ -459,17 +440,15 @@ h2.name{
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s, visibility 0.3s;
-    transform: scale(0.5); /* Начальный масштаб */
+    transform: scale(0.5);
     transition: transform 0.3s ease;
     box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
 }
 
-
-
 .modal.active {
     transform: scale(1);
     opacity: 1;
-    visibility: visible;/* Конечный масштаб */
+    visibility: visible;
 }
 
 .modal > .img{
@@ -494,7 +473,7 @@ h2.name{
     color: white;
     font-size: 2vh;
     border: none;
-    border-radius: 25px;
+    border-radius: 3vw;
 }
 
 #close{
@@ -505,7 +484,7 @@ h2.name{
     color: #cc3623;
     font-size: 2vh;
     border: 4px solid #cc3623;
-    border-radius: 25px;
+    border-radius: 3vw;
 }
 
 .gift-img{
@@ -521,7 +500,6 @@ h2.name{
     justify-content: center;
 }
 
-
 h2.name{
     text-align: center;
     color: #cddbeb;
@@ -529,7 +507,6 @@ h2.name{
     font-size: 2vh;
     font-weight: 500;
 }
-
 
 .price{
     width: 100%;
@@ -540,7 +517,6 @@ h2.name{
 
 .starr{
     height: 2vh;
-
 }
 
 .pc{
@@ -568,7 +544,6 @@ h2.name{
     align-items: center;
 }
 
-
 .price{
     display: flex;
     align-items: center;
@@ -579,7 +554,6 @@ h2.name{
     flex-direction: row;
     align-items: center;
 }
-
 
 .holder > .count > h2{
     color: #cddbeb;

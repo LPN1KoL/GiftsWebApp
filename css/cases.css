@@ -78,9 +78,6 @@ html, body{
     tap-highlight-color: transparent;
 }
 
-/*------- Стили страницы -------*/
-
-
 h1{
     color: #cddbeb;
     font-size: 2vh;
@@ -96,7 +93,7 @@ h1{
 
 .case{
     background-color: #2e3b4b;
-    border-radius: 20px;
+    border-radius: 3vw;
     margin: 0.5vh 1vw;
     height: 25vh;
     flex-shrink: 0;
