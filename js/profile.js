@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
+	const user_id = localStorage.getItem("user_id");
+
 
     const plusButton = document.getElementById('main_button');
 
@@ -37,37 +38,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function updateProfile() {
-        try {
-            const result = await sendApiRequest('/api/get_profile', { user_id });
-            
-            // Обновляем баланс
-            const balanceElement = document.getElementById('balance_display');
-            if (balanceElement) {
-                balanceElement.textContent = result.balance.toLocaleString();
-            }
+async function updateProfile() {
+    try {
+        const result = await sendApiRequest('/api/get_profile', { user_id });
+        
+        // Обновляем баланс
+        const balanceElement = document.getElementById('balance_display');
+        if (balanceElement) {
+            balanceElement.textContent = result.balance.toLocaleString();
+        }
 
-            // Обновляем ник
-            const usernameElement = document.querySelector('.profile h1');
-            if (usernameElement) {
-                usernameElement.textContent = '@' + result.username;
-            }
+        // Обновляем ник
+        const usernameElement = document.querySelector('.profile h1');
+        if (usernameElement) {
+            usernameElement.textContent = '@' + result.username;
+        }
 
-            // Обновляем аватар
-            const avatarElement = document.querySelector('.user-pic img');
-            if (avatarElement) {
-                avatarElement.src = `/profile_picture/${user_id}.png`;
-            }
+        // Обновляем аватар
+        const avatarElement = document.querySelector('.user-pic img');
+        if (avatarElement) {
+            avatarElement.src = result.avatar ? result.avatar : `/profile_picture/${user_id}.png`;
+        }
 
-        } catch (err) {
-            console.error("Ошибка при получении профиля:", err);
+        // Отображаем подарки
+        const cardList = document.querySelector('.card-list');
+        if (cardList) {
+            cardList.innerHTML = ""; // очистим старые
 
-            const balanceElement = document.getElementById('balance_display');
-            if (balanceElement) {
-                balanceElement.textContent = "Ошибка";
+            if (result.gifts && result.gifts.length > 0) {
+                result.gifts.forEach(gift => {
+                    const card = document.createElement('div');
+                    card.classList.add('card');
+
+                    card.innerHTML = `
+                        <div class="gift-img">
+                            <img class="gimg" src="${gift.img}" alt="${gift.name}">
+                        </div>
+                        <h2 class="name">${gift.name}</h2>
+                        <div class="price">
+                            <div class="pc">
+                                <div class="starss">
+                                    <img class="starr" src="data:image/svg+xml,%3Csvg ... %3C/svg%3E">
+                                </div>
+                                <div class="ct">
+                                    <h2>${gift.price.toLocaleString()}</h2>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    cardList.appendChild(card);
+                });
+            } else {
+                cardList.innerHTML = "<p>У вас пока нет подарков.</p>";
             }
         }
+
+    } catch (err) {
+        console.error("Ошибка при получении профиля:", err);
+
+        const balanceElement = document.getElementById('balance_display');
+        if (balanceElement) {
+            balanceElement.textContent = "Ошибка";
+        }
     }
+}
+
 
     updateProfile();
 });

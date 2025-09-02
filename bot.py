@@ -25,7 +25,7 @@ except ImportError:
         img = Image.new('RGB', (100, 100), color='red')
         img.save(output_path)
 
-API_TOKEN = "token"
+API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
 ADMIN_ID = 849307631
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -64,7 +64,8 @@ async def init_db():
                 user_id INTEGER PRIMARY KEY,
                 username TEXT,
                 balance INTEGER DEFAULT 0,
-                gifts TEXT DEFAULT '[]'
+                gifts TEXT DEFAULT '[]',
+                avatar TEXT
             )
         """)
         await db.commit()
@@ -155,7 +156,7 @@ async def handle_start(message: Message):
         ],
         resize_keyboard=True
     )
-    
+
     await message.answer("Добро пожаловать! Ваши монеты: 0. Для пополнения отправьте число (сколько звёзд хотите обменять на монеты, 1 к 1).", reply_markup=keyboard)
 
 @dp.message(F.text == "/paysupport")
@@ -623,14 +624,16 @@ async def try_open_case(user_id, case_id):
 
         # Обновление баланса и добавление подарка
         new_balance = balance - price
-        gifts_list = ast.literal_eval(gifts_raw)
+        # читаем список
+        gifts_list = json.loads(gifts_raw) if gifts_raw else []
         gifts_list.append(selected_gift["id"])
-
+        
+        # сохраняем обратно
         await db.execute(
             "UPDATE users SET balance = ?, gifts = ? WHERE user_id = ?",
             (new_balance, json.dumps(gifts_list), user_id)
         )
-        await db.commit()
+
 
         send_win_notification_to_admin_sync(user_id, selected_gift, case_id)
 
@@ -773,40 +776,34 @@ async def get_user_avatar(user_id):
 
 async def get_user_profile_data(user_id):
     async with aiosqlite.connect("users.db") as db:
-        async with db.execute("SELECT username, balance, gifts, avatar FROM users WHERE user_id = ?", (user_id,)) as cursor:
+        async with db.execute(
+            "SELECT username, balance, gifts, avatar FROM users WHERE user_id = ?",
+            (user_id,)
+        ) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return {"error": "Пользователь не найден"}
             username, balance, gifts_json, avatar_path = row
-            # gifts_json может быть None, тогда дадим пустой список
-            if gifts_json:
-                try:
-                    gifts_ids = json.loads(gifts_json)
-                except Exception:
-                    gifts_ids = []
-            else:
-                gifts_ids = []
 
-    # Загружаем все подарки из кейсов
+            gifts_ids = json.loads(gifts_json) if gifts_json else []
+
+    # Загружаем все подарки
     with open("data/cases.json", "r", encoding="utf-8") as f:
         cases = json.load(f)
 
-    gift_info = {}
-    for case in cases:
-        for gift in case["gifts"]:
-            gift_info[gift["id"]] = gift
+    gift_info = {gift["id"]: gift for case in cases for gift in case["gifts"]}
 
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
 
-    avatar_file = avatar_path if avatar_path and os.path.isfile(avatar_path) else None
+    avatar_file = f"/{avatar_path}" if avatar_path and os.path.isfile(avatar_path) else None
 
-    
     return {
         "username": username,
         "balance": balance,
         "avatar": avatar_file,
         "gifts": user_gifts
     }
+
 
 def send_win_notification_to_admin_sync(user_id, gift, case_id):
     message_text = (
