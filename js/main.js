@@ -7,6 +7,8 @@ const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
 
 // Получаем user_id из Telegram WebApp или используем тестовый
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
+localStorage.setItem("user_id", user_id);
+
 
 async function sendApiRequest(endpoint, data) {
     try {

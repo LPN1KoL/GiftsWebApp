@@ -50,11 +50,12 @@ def handle_get_profile(data):
 
     try:
         profile_data = get_user_profile_data_sync(user_id)
-        # Ожидаем, что get_user_profile_data_sync вернёт что-то типа:
-        # { "username": "MyNick", "balance": 12345 }
+        # Вернуть все поля
         return 200, {
             "balance": profile_data.get("balance", 0),
-            "username": profile_data.get("username", "unknown")
+            "username": profile_data.get("username", "unknown"),
+            "avatar": profile_data.get("avatar"),
+            "gifts": profile_data.get("gifts", [])
         }
     except Exception as e:
         print(f"Ошибка получения профиля: {e}")
