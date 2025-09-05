@@ -55,7 +55,7 @@ async function updateProfile() {
         // Обновляем аватар
         const avatarElement = document.querySelector('.user-pic img');
         if (avatarElement) {
-            avatarElement.src = result.avatar;
+            avatarElement.src = result.avatar.toLocaleString();
         }
 
         // Отображаем подарки
