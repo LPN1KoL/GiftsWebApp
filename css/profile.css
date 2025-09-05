@@ -78,6 +78,105 @@ html, body{
     tap-highlight-color: transparent;
 }
 
+.modal{
+    position: fixed;
+    border-radius: 3vw;
+    background-color: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(80px);
+    backdrop-filter: blur(80px);
+    padding: 1vh 2vw;
+    width: 80vw;
+    height: 60vh;
+    margin: 19vh 9vw;
+    z-index: 10000;
+    position: fixed;
+    display: grid;
+    grid-template-columns: 100%;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    transform: scale(0.5);
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
+}
+
+.modal.active {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal > .img{
+    width: 100%;
+    height: 30vh;
+    display: flex;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+}
+
+.modal > .img > img{
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+#get_gift{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 1vh 2vw;
+    background-color: #3281dc;
+    color: white;
+    font-size: 2vh;
+    border: none;
+    border-radius: 3vw;
+}
+
+#close{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 0 2vw;
+    background-color: inherit;
+    color: #cc3623;
+    font-size: 2vh;
+    border: 4px solid #cc3623;
+    border-radius: 3vw;
+}
+
+#sell_gift{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 1vh 2vw;
+    background-color: #4ABD33;
+    color: white;
+    font-size: 2vh;
+    border: none;
+    border-radius: 3vw;
+}
+
+.holder{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.holder > .count > h2{
+    color: #cddbeb;
+    font-size: 3vh;
+    margin: 0;
+    margin-top: 0.5vh;
+}
+
+.holder > .stars{
+    height: 3vh;
+}
+
+.holder > .stars > img{
+    height: 100%;
+}
+
+/* ------- Стили страницы ------*/
+
 .profile{
     width: 100%;
     min-height: 25vh;
@@ -502,70 +601,7 @@ h2.name{
     align-items: center;
 }
 
-.modal{
-    position: fixed;
-    border-radius: 3vw;
-    background-color: rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(80px);
-    backdrop-filter: blur(80px);
-    padding: 1vh 2vw;
-    width: 80vw;
-    height: 60vh;
-    margin: 19vh 9vw;
-    z-index: 10000;
-    position: fixed;
-    display: grid;
-    grid-template-columns: 100%;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-    transform: scale(0.5);
-    transition: transform 0.3s ease;
-    box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
-}
 
-.modal.active {
-    transform: scale(1);
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal > .img{
-    width: 100%;
-    height: 30vh;
-    display: flex;
-    aspect-ratio: 1 / 1;
-    justify-content: center;
-}
-
-.modal > .img > img{
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain;
-}
-
-#get_gift{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 1vh 2vw;
-    background-color: #3281dc;
-    color: white;
-    font-size: 2vh;
-    border: none;
-    border-radius: 3vw;
-}
-
-#close{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 0 2vw;
-    background-color: inherit;
-    color: #cc3623;
-    font-size: 2vh;
-    border: 4px solid #cc3623;
-    border-radius: 3vw;
-}
 
 .gift-img{
     width: 100%;
@@ -629,26 +665,7 @@ h2.name{
     align-items: center;
 }
 
-.holder{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
 
-.holder > .count > h2{
-    color: #cddbeb;
-    font-size: 3vh;
-    margin: 0;
-    margin-top: 0.5vh;
-}
-
-.holder > .stars{
-    height: 3vh;
-}
-
-.holder > .stars > img{
-    height: 100%;
-}
 
 .sub-block > h1{
     margin: 0;
@@ -683,13 +700,4 @@ h2.name{
     justify-content: center;
 }
 
-#sell_gift{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 1vh 2vw;
-    background-color: #4ABD33;
-    color: white;
-    font-size: 2vh;
-    border: none;
-    border-radius: 3vw;
-}
+
