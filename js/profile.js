@@ -22,21 +22,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (plusButton) {
-        plusButton.addEventListener('click', async () => {
-            if (!user_id) {
-                alert("Ошибка: Не удалось определить Telegram ID");
-                return;
-            }
-
-            try {
-                await sendApiRequest('/api/plus', { user_id });
-                alert("Запрос успешно отправлен!");
-            } catch (err) {
-                alert("Ошибка при отправке: " + err.message);
-            }
-        });
+async function plus_func(){
+    if (!user_id) {
+        alert("Ошибка: Не удалось определить Telegram ID");
+        return;
     }
+
+    try {
+        await sendApiRequest('/api/plus', { user_id });
+        alert("Запрос успешно отправлен!");
+    } catch (err) {
+        alert("Ошибка при отправке: " + err.message);
+    }
+}
 
 async function updateProfile() {
     try {
@@ -57,7 +55,7 @@ async function updateProfile() {
         // Обновляем аватар
         const avatarElement = document.querySelector('.user-pic img');
         if (avatarElement) {
-            avatarElement.src = result.avatar ? result.avatar : `/profile_picture/${user_id}.png`;
+            avatarElement.src = result.avatar;
         }
 
         // Отображаем подарки
@@ -89,7 +87,7 @@ async function updateProfile() {
                     cardList.appendChild(card);
                 });
             } else {
-                cardList.innerHTML = "<p>У вас пока нет подарков.</p>";
+                document.getElementById("wrap").innerHTML = ""
             }
         }
 
@@ -106,3 +104,8 @@ async function updateProfile() {
 
     updateProfile();
 });
+
+function cardClick(gift_id){
+    card = document.getElementById('card ' + gift_id) // Можно получить цену, картинку, подставить в всплывающее окно
+    document.querySelector('.modal').classList.add('active');
+}

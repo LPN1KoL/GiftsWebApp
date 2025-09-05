@@ -1,9 +1,11 @@
 import asyncio
+import base64
 import json
 import random
 import ast
 import aiosqlite
 import os
+from aiogram.client.session import aiohttp
 from aiogram.filters import Command
 import os
 from aiogram import Bot, Dispatcher, types, F, Router
@@ -116,18 +118,9 @@ async def handle_start(message: Message):
     username = message.from_user.username or ""
     
     async with aiosqlite.connect("users.db") as db:
-        # Сначала проверяем, существует ли столбец avatar
-        cursor = await db.execute("PRAGMA table_info(users)")
-        columns = await cursor.fetchall()
-        column_names = [column[1] for column in columns]
-        
-        # Если столбца avatar нет - добавляем его
-        if 'avatar' not in column_names:
-            await db.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
-            await db.commit()
         
         # Проверяем, существует ли пользователь
-        cursor = await db.execute("SELECT avatar FROM users WHERE user_id = ?", (user_id,))
+        cursor = await db.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
         user_exists = await cursor.fetchone()
         
         if user_exists:
@@ -137,14 +130,6 @@ async def handle_start(message: Message):
             # Новый пользователь
             await db.execute("INSERT INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
         
-        await db.commit()
-    
-    # Скачиваем и сохраняем аватарку
-    avatar_path = await download_user_avatar(user_id)
-    
-    # Обновляем аватар в БД
-    async with aiosqlite.connect("users.db") as db:
-        await db.execute("UPDATE users SET avatar = ? WHERE user_id = ?", (avatar_path, user_id))
         await db.commit()
     
     keyboard = types.InlineKeyboardMarkup(
@@ -196,7 +181,7 @@ async def pre_checkout_query(pre_checkout_q: types.PreCheckoutQuery):
         return
     await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
 
-@dp.message(F.successful_payment)
+"""@dp.message(F.successful_payment)
 async def successful_payment(message: types.Message):
     payment_info = message.successful_payment
     payment_id = payment_info.invoice_payload
@@ -207,7 +192,7 @@ async def successful_payment(message: types.Message):
         await message.answer(
             f"Платёж {payment['amount']} звёзд принят. Зачислено {payment['amount']} монет."
         )
-        await balance(message)
+        await balance(message)"""
 
 @router.message(F.text == "/get_money")
 async def handle_get_money(message: Message):
@@ -777,13 +762,13 @@ async def get_user_avatar(user_id):
 async def get_user_profile_data(user_id):
     async with aiosqlite.connect("users.db") as db:
         async with db.execute(
-            "SELECT username, balance, gifts, avatar FROM users WHERE user_id = ?",
+            "SELECT username, balance, gifts FROM users WHERE user_id = ?",
             (user_id,)
         ) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return {"error": "Пользователь не найден"}
-            username, balance, gifts_json, avatar_path = row
+            username, balance, gifts_json = row
 
             gifts_ids = json.loads(gifts_json) if gifts_json else []
 
@@ -795,13 +780,32 @@ async def get_user_profile_data(user_id):
 
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
 
-    avatar_file = f"/{avatar_path}" if avatar_path and os.path.isfile(avatar_path) else None
+    try:
+        # Получаем информацию об аватарах
+        profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
+        if not profile_photos or profile_photos.total_count == 0:
+            return None
+
+        current_photo = profile_photos.photos[0][0]
+
+        file_info = await bot.get_file(current_photo.file_id)
+        file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+
+        # Скачиваем и конвертируем в base64
+        async with aiohttp.ClientSession() as session:
+            async with session.get(file_url) as response:
+                if response.status == 200:
+                    image_data = await response.read()
+                    avatar = base64.b64encode(image_data).decode('utf-8')
+
+    except Exception as e:
+        print(e)
 
     return {
         "username": username,
         "balance": balance,
-        "avatar": avatar_file,
-        "gifts": user_gifts
+        "gifts": user_gifts,
+        "avatar": avatar
     }
 
 
