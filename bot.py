@@ -14,6 +14,10 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from aiogram.types import LabeledPrice
 import requests
+import aiohttp
+import base64
+from io import BytesIO
+from PIL import Image
 
 # Добавьте в начало файла
 try:
@@ -109,6 +113,49 @@ def save_cases(cases):
     os.makedirs("data", exist_ok=True)
     with open("data/cases.json", "w", encoding="utf-8") as f:
         json.dump(cases, f, ensure_ascii=False, indent=2)
+
+async def get_user_avatar_base64(bot: Bot, user_id: int, size: int = 256) -> str:
+    """
+    Получает аватар пользователя и конвертирует в base64.
+    Если аватара нет или произошла ошибка - возвращает base64 черного квадрата.
+    Всё выполняется в памяти без сохранения на диск.
+
+    Args:
+        bot: Экземпляр aiogram Bot
+        user_id: ID пользователя Telegram
+        size: Размер выходного изображения в пикселях (квадрат)
+
+    Returns:
+        Base64 строка с data URL (data:image/jpeg;base64,...)
+    """
+    try:
+        # Пытаемся получить аватар пользователя
+        profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
+
+        if profile_photos and profile_photos.total_count > 0:
+            # Берем самый большой размер аватара
+            largest_photo = profile_photos.photos[0][0]
+            file_info = await bot.get_file(largest_photo.file_id)
+            file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+
+            # Скачиваем изображение в память
+            async with aiohttp.ClientSession() as session:
+                async with session.get(file_url) as response:
+                    if response.status == 200:
+                        image_data = await response.read()
+                        base64_data = base64.b64encode(image_data).decode('utf-8')
+                        return f"data:image/jpeg;base64,{base64_data}"
+
+        # Если аватар не найден - создаем черный квадрат
+        with BytesIO() as buffer:
+            black_image = Image.new('RGB', (size, size), color='black')
+            black_image.save(buffer, format='JPEG', quality=95)
+            base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            return f"data:image/jpeg;base64,{base64_data}"
+
+    except Exception:
+        # В случае любой ошибки возвращаем черный квадрат 1x1 пиксель
+        return "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8AAEQgAAQABAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A8aooor8tP//Z"
 
 # --- КОМАНДЫ ---
 
@@ -780,26 +827,8 @@ async def get_user_profile_data(user_id):
 
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
 
-    try:
-        # Получаем информацию об аватарах
-        profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
-        if not profile_photos or profile_photos.total_count == 0:
-            return None
-
-        current_photo = profile_photos.photos[0][0]
-
-        file_info = await bot.get_file(current_photo.file_id)
-        file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
-
-        # Скачиваем и конвертируем в base64
-        async with aiohttp.ClientSession() as session:
-            async with session.get(file_url) as response:
-                if response.status == 200:
-                    image_data = await response.read()
-                    avatar = base64.b64encode(image_data).decode('utf-8')
-
-    except Exception as e:
-        print(e)
+    avatar = await get_user_avatar_base64(bot, user_id)
+    print(avatar)
 
     return {
         "username": username,
