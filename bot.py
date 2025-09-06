@@ -853,7 +853,6 @@ async def get_user_profile_data(user_id):
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
 
     avatar = await get_user_avatar_base64(bot, user_id)
-    print(avatar)
 
     return {
         "username": username,
