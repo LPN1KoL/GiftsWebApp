@@ -131,48 +131,84 @@ async def get_user_avatar_base64(bot: Bot, user_id: int, size: int = 256) -> str
     try:
         print(f"Начинаем получение аватара для user_id: {user_id}")
 
-        # Пытаемся получить аватар пользователя
-        profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
-        print(f"Результат get_user_profile_photos: {profile_photos}")
+        # Создаем новую сессию aiohttp для избежания конфликта контекстов
+        async with aiohttp.ClientSession() as session:
+            # Пытаемся получить аватар пользователя
+            try:
+                profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
+                print(f"Результат get_user_profile_photos: {profile_photos}")
 
-        if profile_photos and profile_photos.total_count > 0:
-            print(f"Аватар найден! Количество фото: {profile_photos.total_count}")
-            print(f"Наборы фото: {profile_photos.photos}")
+                if profile_photos and profile_photos.total_count > 0:
+                    print(f"Аватар найден! Количество фото: {profile_photos.total_count}")
 
-            # Берем самый большой размер аватара
-            largest_photo = profile_photos.photos[0][0]
-            print(f"Выбранный фото объект: {largest_photo}")
-            print(f"File ID: {largest_photo.file_id}")
+                    # Берем первый размер (актуальная аватарка)
+                    current_photo = profile_photos.photos[0][0]
+                    print(f"Выбранный фото объект: {current_photo}")
+                    print(f"File ID: {current_photo.file_id}")
 
-            file_info = await bot.get_file(largest_photo.file_id)
-            print(f"Информация о файле: {file_info}")
+                    file_info = await bot.get_file(current_photo.file_id)
+                    print(f"Информация о файле: {file_info}")
 
-            file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
-            print(f"URL файла: {file_url}")
+                    file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+                    print(f"URL файла: {file_url}")
 
-            # Скачиваем изображение в память
-            async with aiohttp.ClientSession() as session:
-                async with session.get(file_url) as response:
-                    print(f"Статус ответа: {response.status}")
-                    if response.status == 200:
-                        image_data = await response.read()
-                        print(f"Изображение скачано, размер: {len(image_data)} bytes")
+                    # Скачиваем изображение в память
+                    async with session.get(file_url) as response:
+                        print(f"Статус ответа: {response.status}")
+                        if response.status == 200:
+                            image_data = await response.read()
+                            print(f"Изображение скачано, размер: {len(image_data)} bytes")
 
-                        base64_data = base64.b64encode(image_data).decode('utf-8')
-                        print(f"Base64 длина: {len(base64_data)} символов")
-                        print(f"Первые 50 символов base64: {base64_data[:50]}...")
+                            base64_data = base64.b64encode(image_data).decode('utf-8')
+                            print(f"Base64 длина: {len(base64_data)} символов")
 
-                        return f"data:image/jpeg;base64,{base64_data}"
-                    else:
-                        print(f"Ошибка HTTP: {response.status}")
+                            return f"data:image/jpeg;base64,{base64_data}"
+                        else:
+                            print(f"Ошибка HTTP: {response.status}")
+                            raise Exception(f"HTTP error: {response.status}")
 
-        print("Аватар не найден или total_count = 0, создаем черный квадрат")
+                print("Аватар не найден или total_count = 0")
+
+            except RuntimeError as e:
+                if "Timeout context manager should be used inside a task" in str(e):
+                    print("Ошибка контекста таймаута, пробуем альтернативный подход...")
+                    # Пробуем получить аватар через прямой HTTP запрос
+                    try:
+                        # Альтернативный метод получения аватара
+                        user_profile_url = f"https://api.telegram.org/bot{bot.token}/getUserProfilePhotos?user_id={user_id}&limit=1"
+                        async with session.get(user_profile_url) as profile_response:
+                            if profile_response.status == 200:
+                                profile_data = await profile_response.json()
+                                if profile_data.get('ok') and profile_data['result']['total_count'] > 0:
+                                    file_id = profile_data['result']['photos'][0][0]['file_id']
+
+                                    # Получаем информацию о файле
+                                    file_info_url = f"https://api.telegram.org/bot{bot.token}/getFile?file_id={file_id}"
+                                    async with session.get(file_info_url) as file_response:
+                                        if file_response.status == 200:
+                                            file_data = await file_response.json()
+                                            if file_data.get('ok'):
+                                                file_path = file_data['result']['file_path']
+                                                file_download_url = f"https://api.telegram.org/file/bot{bot.token}/{file_path}"
+
+                                                # Скачиваем изображение
+                                                async with session.get(file_download_url) as download_response:
+                                                    if download_response.status == 200:
+                                                        image_data = await download_response.read()
+                                                        base64_data = base64.b64encode(image_data).decode('utf-8')
+                                                        return f"data:image/jpeg;base64,{base64_data}"
+                    except Exception as alt_error:
+                        print(f"Альтернативный метод тоже failed: {alt_error}")
+                else:
+                    raise e
+
+        print("Создаем черный квадрат...")
         # Если аватар не найден - создаем черный квадрат
         with BytesIO() as buffer:
             black_image = Image.new('RGB', (size, size), color='black')
             black_image.save(buffer, format='JPEG', quality=95)
             base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
-            print(f"⚫ Создан черный квадрат, base64 длина: {len(base64_data)}")
+            print(f"Создан черный квадрат, base64 длина: {len(base64_data)}")
             return f"data:image/jpeg;base64,{base64_data}"
 
     except Exception as e:
@@ -180,10 +216,13 @@ async def get_user_avatar_base64(bot: Bot, user_id: int, size: int = 256) -> str
         import traceback
         traceback.print_exc()
 
-        # В случае любой ошибки возвращаем черный квадрат 1x1 пиксель
-        fallback_base64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR9ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8AAEQgAAQABAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A8aooor8tP//Z"
-        print(f"Возвращаем fallback base64, длина: {len(fallback_base64)}")
-        return fallback_base64
+        # Создаем черный квадрат при любой ошибке
+        with BytesIO() as buffer:
+            black_image = Image.new('RGB', (size, size), color='black')
+            black_image.save(buffer, format='JPEG', quality=95)
+            base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            return f"data:image/jpeg;base64,{base64_data}"
+
 # --- КОМАНДЫ ---
 
 @router.message(F.text == "/start")
