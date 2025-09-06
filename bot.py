@@ -25,13 +25,13 @@ try:
 except ImportError:
     # Заглушка для тестирования
     def take_screenshot_and_process(url, output_path, crop_x, crop_y, crop_size):
-        print(f"⚠️  Скриншот не сделан (функция не импортирована): {url}")
+        print(f"Скриншот не сделан (функция не импортирована): {url}")
         # Создаем пустой файл для теста
         from PIL import Image
         img = Image.new('RGB', (100, 100), color='red')
         img.save(output_path)
 
-API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
+API_TOKEN = "8410299640:AAFJmaT8n-OlpO4nVejf7UWLAmeGgqksPvU"
 ADMIN_ID = 849307631
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
@@ -214,7 +214,7 @@ async def handle_start(message: Message):
         resize_keyboard=True
     )
 
-    await message.answer("Добро пожаловать! Ваши монеты: 0. Для пополнения отправьте число (сколько звёзд хотите обменять на монеты, 1 к 1).", reply_markup=keyboard)
+    await message.answer("🎁 Приветсвуем тебя в нашей игре!", reply_markup=keyboard)
 
 @dp.message(F.text == "/paysupport")
 async def paysupport(message: types.Message):
