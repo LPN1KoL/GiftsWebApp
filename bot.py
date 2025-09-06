@@ -144,6 +144,7 @@ async def get_user_avatar_base64(bot: Bot, user_id: int, size: int = 256) -> str
                     if response.status == 200:
                         image_data = await response.read()
                         base64_data = base64.b64encode(image_data).decode('utf-8')
+                        print(f"data:image/jpeg;base64,{base64_data}")
                         return f"data:image/jpeg;base64,{base64_data}"
 
         # Если аватар не найден - создаем черный квадрат
