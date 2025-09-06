@@ -129,35 +129,61 @@ async def get_user_avatar_base64(bot: Bot, user_id: int, size: int = 256) -> str
         Base64 строка с data URL (data:image/jpeg;base64,...)
     """
     try:
+        print(f"Начинаем получение аватара для user_id: {user_id}")
+
         # Пытаемся получить аватар пользователя
         profile_photos = await bot.get_user_profile_photos(user_id, limit=1)
+        print(f"Результат get_user_profile_photos: {profile_photos}")
 
         if profile_photos and profile_photos.total_count > 0:
+            print(f"Аватар найден! Количество фото: {profile_photos.total_count}")
+            print(f"Наборы фото: {profile_photos.photos}")
+
             # Берем самый большой размер аватара
             largest_photo = profile_photos.photos[0][0]
+            print(f"Выбранный фото объект: {largest_photo}")
+            print(f"File ID: {largest_photo.file_id}")
+
             file_info = await bot.get_file(largest_photo.file_id)
+            print(f"Информация о файле: {file_info}")
+
             file_url = f"https://api.telegram.org/file/bot{bot.token}/{file_info.file_path}"
+            print(f"URL файла: {file_url}")
 
             # Скачиваем изображение в память
             async with aiohttp.ClientSession() as session:
                 async with session.get(file_url) as response:
+                    print(f"Статус ответа: {response.status}")
                     if response.status == 200:
                         image_data = await response.read()
-                        base64_data = base64.b64encode(image_data).decode('utf-8')
-                        print(f"data:image/jpeg;base64,{base64_data}")
-                        return f"data:image/jpeg;base64,{base64_data}"
+                        print(f"Изображение скачано, размер: {len(image_data)} bytes")
 
+                        base64_data = base64.b64encode(image_data).decode('utf-8')
+                        print(f"Base64 длина: {len(base64_data)} символов")
+                        print(f"Первые 50 символов base64: {base64_data[:50]}...")
+
+                        return f"data:image/jpeg;base64,{base64_data}"
+                    else:
+                        print(f"Ошибка HTTP: {response.status}")
+
+        print("Аватар не найден или total_count = 0, создаем черный квадрат")
         # Если аватар не найден - создаем черный квадрат
         with BytesIO() as buffer:
             black_image = Image.new('RGB', (size, size), color='black')
             black_image.save(buffer, format='JPEG', quality=95)
             base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            print(f"⚫ Создан черный квадрат, base64 длина: {len(base64_data)}")
             return f"data:image/jpeg;base64,{base64_data}"
 
-    except Exception:
-        # В случае любой ошибки возвращаем черный квадрат 1x1 пиксель
-        return "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR5ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8AAEQgAAQABAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A8aooor8tP//Z"
+    except Exception as e:
+        print(f"Произошла ошибка: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
 
+        # В случае любой ошибки возвращаем черный квадрат 1x1 пиксель
+        fallback_base64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD//gA7Q1JFQVRPUjogZ2QtanBlZyB2MS4wICh1c2luZyBJSkcgSlBFRyB2ODApLCBxdWFsaXR9ID0gOTAK/9sAQwADAgIDAgIDAwMDBAMDBAUIBQUEBAUKBwcGCAwKDAwLCgsLDQ4SEA0OEQ4LCxAWEBETFBUVFQwPFxgWFBgSFBUU/9sAQwEDBAQFBAUJBQUJFA0LDRQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQU/8AAEQgAAQABAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/aAAwDAQACEQMRAD8A8aooor8tP//Z"
+        print(f"Возвращаем fallback base64, длина: {len(fallback_base64)}")
+        return fallback_base64
 # --- КОМАНДЫ ---
 
 @router.message(F.text == "/start")
