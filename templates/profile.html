@@ -181,6 +181,7 @@
 <script src="/static/js/profile.js"></script>
 <script>
 function plus_func() {
+    let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
     if (!user_id) {
         alert("Ошибка: Не удалось определить Telegram ID");
         return;
