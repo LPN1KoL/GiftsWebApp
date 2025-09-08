@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse, JSONResponse
 import uvicorn
 import ssl
 import asyncio
@@ -28,6 +29,17 @@ app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
 
 # --- Роутинг ---
+@app.post("/")
+async def handle_get_balance(request: Request):
+    data = await request.json()
+    user_id = data.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Missing 'user_id'")
+
+    balance = await get_user_balance(user_id)
+    return FileResponse('templates/main.html')
+
+
 @app.post("/api/get_balance")
 async def handle_get_balance(request: Request):
     data = await request.json()
