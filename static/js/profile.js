@@ -22,14 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-async function plus_func(){
+function plus_func(){
     if (!user_id) {
         alert("Ошибка: Не удалось определить Telegram ID");
         return;
     }
 
     try {
-        window.Telegram?.WebApp?.sendData(JSON.stringify({ foo: "donate" }));
+        window.Telegram?.WebApp?.sendData(JSON.stringify({foo: "donate"}));
         window.Telegram?.WebApp?.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
