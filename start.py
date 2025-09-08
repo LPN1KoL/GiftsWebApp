@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 import uvicorn
 import ssl
 import asyncio
@@ -29,15 +29,37 @@ app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 
 
 # --- Роутинг ---
-@app.post("/")
-async def handle_get_balance(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing 'user_id'")
+@app.get("/", response_class=HTMLResponse)
+async def serve_root():
+    return FileResponse("templates/main.html")
 
-    balance = await get_user_balance(user_id)
-    return FileResponse('templates/main.html')
+@app.get("/main.html", response_class=HTMLResponse)
+async def serve_index():
+    return FileResponse("templates/main.html")
+
+@app.get("/cases.html", response_class=HTMLResponse)
+async def serve_index():
+    return FileResponse("templates/cases.html")
+
+@app.get("/profile.html", response_class=HTMLResponse)
+async def serve_index():
+    return FileResponse("templates/profile.html")
+
+
+@app.get("/{filename}")
+async def serve_static_files(filename: str):
+    # Проверяем существование файла в templates
+    templates_path = os.path.join("templates", filename)
+    if os.path.isfile(templates_path):
+        return FileResponse(templates_path)
+
+    # Проверяем существование файла в static
+    static_path = os.path.join("static", filename)
+    if os.path.isfile(static_path):
+        return FileResponse(static_path)
+
+    # Если файл не найден
+    raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.post("/api/get_balance")
