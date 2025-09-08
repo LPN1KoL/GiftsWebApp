@@ -28,7 +28,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 app.mount("/data", StaticFiles(directory="data"), name="data")
-app.mount("/media", StaticFiles(directory="templates"), name="templates")
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
 # --- Роутинг ---
