@@ -49,25 +49,20 @@ async def get_user_balance(user_id):
 async def get_user_profile_data(user_id):
     async with aiosqlite.connect(DB_PATH) as db:
         async with db.execute(
-            "SELECT username, balance, gifts, avatar FROM users WHERE user_id = ?",
+            "SELECT username, balance, gifts FROM users WHERE user_id = ?",
             (user_id,)
         ) as cursor:
             row = await cursor.fetchone()
             if not row:
                 return {"error": "Пользователь не найден"}
-            username, balance, gifts_json, avatar_path = row
+            username, balance, gifts_json = row
 
     return {
         "username": username,
         "balance": balance,
-        "gifts_json": gifts_json,
-        "avatar_path": avatar_path
+        "gifts_json": gifts_json
     }
 
-async def update_user_avatar(user_id, avatar_path):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("UPDATE users SET avatar = ? WHERE user_id = ?", (avatar_path, user_id))
-        await db.commit()
 
 async def create_or_update_user(user_id, username):
     async with aiosqlite.connect(DB_PATH) as db:

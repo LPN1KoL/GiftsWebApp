@@ -3,8 +3,6 @@ import os
 import random
 import asyncio
 
-def try_open_case_sync(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification):
-    return asyncio.run(try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification))
 
 def load_cases():
     if os.path.exists("data/cases.json"):
@@ -62,8 +60,6 @@ def get_case_by_id(case_id):
 def get_gift_by_id(case, gift_id):
     return next((g for g in case["gifts"] if g["id"] == gift_id), None)
 
-def try_open_case_sync(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification):
-    return asyncio.run(try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification))
 
 async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification):
     cases = load_cases()
@@ -91,7 +87,7 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
     gifts_list.append(selected_gift["id"])
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
-    send_admin_notification(user_id, selected_gift, case_id)
+    await asyncio.to_thread(send_admin_notification, user_id, selected_gift, case_id)
     return {
         "gift": {
             "id": selected_gift["id"],

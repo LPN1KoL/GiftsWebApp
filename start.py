@@ -1,152 +1,121 @@
-from http.server import HTTPServer, SimpleHTTPRequestHandler
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 import ssl
-import json
 import asyncio
-import threading
 import os
-from utils import send_queue
-from db import get_user_balance_sync, get_user_profile_data_sync
+from db import get_user_balance, get_user_profile_data
 from db import get_user, update_user_balance_and_gifts
-from cases import try_open_case_sync
-from utils import send_plus_prompt
+from cases import try_open_case
 from bot import main as bot_main
-from api import send_win_notification_to_admin_sync
+from api import *
 
-HOST = "0.0.0.0"
-HTTP_PORT = 8080
-HTTPS_PORT = 443
+app = FastAPI(title="Gifts App API")
 
-SSL_CERT = "/etc/letsencrypt/live/giftsapp.ddns.net/fullchain.pem"
-SSL_KEY = "/etc/letsencrypt/live/giftsapp.ddns.net/privkey.pem"
+# Настройка CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Монтирование статических файлов
+app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+
 
 # --- Роутинг ---
-def handle_plus(data):
+@app.post("/api/get_balance")
+async def handle_get_balance(request: Request):
+    data = await request.json()
     user_id = data.get("user_id")
     if not user_id:
-        return 400, {"error": "Missing 'user_id'"}
-    print("Попытка отправить сообщение боту:", user_id)
-    send_queue.put_nowait(user_id)
-    return 200, {"ok": True}
+        raise HTTPException(status_code=400, detail="Missing 'user_id'")
 
-def handle_get_balance(data):
-    user_id = data.get("user_id")
-    if not user_id:
-        return 400, {"error": "Missing 'user_id'"}
+    balance = await get_user_balance(user_id)
+    return {"balance": balance}
 
-    balance = get_user_balance_sync(user_id)
-    return 200, {"balance": balance}
-    
-def handle_open_case(data):
+
+@app.post("/api/open_case")
+async def handle_open_case(request: Request):
+    data = await request.json()
     user_id = data.get("user_id")
     case_id = data.get("case_id")
     if not user_id:
-        return 400, {"error": "Missing 'user_id'"}
+        raise HTTPException(status_code=400, detail="Missing 'user_id'")
 
-    result = try_open_case_sync(
+    result = await try_open_case(
         user_id,
         case_id,
         get_user,
         update_user_balance_and_gifts,
-        send_win_notification_to_admin_sync
+        send_win_notification_to_admin
     )
+
     if "error" in result:
-        return 400, {"error": result["error"]}
+        raise HTTPException(status_code=400, detail=result["error"])
 
-    return 200, result
+    return result
 
-def handle_get_profile(data):
+
+@app.post("/api/get_profile")
+async def handle_get_profile(request: Request):
+    data = await request.json()
     user_id = data.get("user_id")
     if not user_id:
-        return 400, {"error": "Missing 'user_id'"}
+        raise HTTPException(status_code=400, detail="Missing 'user_id'")
 
     try:
-        profile_data = get_user_profile_data_sync(user_id)
-        # Вернуть все поля
-        return 200, {
+        profile_data = await get_user_profile_data(user_id)
+        return {
             "balance": profile_data.get("balance", 0),
             "username": profile_data.get("username", "unknown"),
-            "avatar": profile_data.get("avatar"),
+            "avatar": await get_user_avatar_base64(user_id),
             "gifts": profile_data.get("gifts", [])
         }
     except Exception as e:
         print(f"Ошибка получения профиля: {e}")
-        return 500, {"error": "Internal server error"}
+        raise HTTPException(status_code=500, detail="Internal server error")
 
-
-ROUTES = {
-    "/api/plus": handle_plus,
-    "/api/get_profile": handle_get_profile,
-    "/api/get_balance": handle_get_balance,
-    "/api/open_case": handle_open_case,
-}
-
-
-# --- Обработчик HTTP ---
-class MyHandler(SimpleHTTPRequestHandler):
-    def do_GET(self):
-        if self.path in ['/', '/index.html']:
-            self.path = '/templates/main.html'
-        return super().do_GET()
-
-    def end_headers(self):
-        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate')
-        self.send_header('Pragma', 'no-cache')
-        self.send_header('Expires', '0')
-        super().end_headers()
-
-    def do_POST(self):
-        length = int(self.headers.get('Content-Length', 0))
-        body = self.rfile.read(length)
-        try:
-            data = json.loads(body)
-        except json.JSONDecodeError:
-            self.send_response(400)
-            self.end_headers()
-            self.wfile.write(b'{"error": "Invalid JSON"}')
-            return
-
-        handler = ROUTES.get(self.path)
-        if handler:
-            try:
-                status, response = handler(data)
-            except Exception as e:
-                print("Ошибка в обработчике:", e)
-                self.send_response(500)
-                self.end_headers()
-                self.wfile.write(b'{"error": "Internal server error"}')
-                return
-            self.send_response(status)
-            self.send_header('Content-Type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(response).encode('utf-8'))
-        else:
-            self.send_response(404)
-            self.end_headers()
-            self.wfile.write(b'{"error": "Unknown endpoint"}')
 
 # --- Запуск ---
-def run_server():
-    try:
-        if not os.path.isfile(SSL_CERT) or not os.path.isfile(SSL_KEY):
-            raise FileNotFoundError("SSL-сертификаты не найдены, fallback на HTTP")
+async def run_server():
+    ssl_cert = "/etc/letsencrypt/live/giftsapp.ddns.net/fullchain.pem"
+    ssl_key = "/etc/letsencrypt/live/giftsapp.ddns.net/privkey.pem"
 
-        httpd = HTTPServer((HOST, HTTPS_PORT), MyHandler)
+    ssl_context = None
+    port = 8080
 
-        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain(certfile=SSL_CERT, keyfile=SSL_KEY)
-        httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
-        print(f"Сервер ЗАПУЩЕН на https://{HOST}:{HTTPS_PORT}")
-    except Exception as e:
-        print("❌ Не удалось запустить HTTPS:", e)
-        httpd = HTTPServer((HOST, HTTP_PORT), MyHandler)
-        print(f"Сервер fallback на http://{HOST}:{HTTP_PORT}")
-    try:
-        httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nСервер остановлен")
-    finally:
-        httpd.server_close()
+    if os.path.isfile(ssl_cert) and os.path.isfile(ssl_key):
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ssl_context.load_cert_chain(ssl_cert, ssl_key)
+        port = 443
+        print(f"Сервер ЗАПУЩЕН на https://0.0.0.0:{port}")
+    else:
+        print("SSL-сертификаты не найдены, fallback на HTTP")
+        print(f"Сервер fallback на http://0.0.0.0:{port}")
+
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=port,
+        ssl_certfile=ssl_cert if ssl_context else None,
+        ssl_keyfile=ssl_key if ssl_context else None,
+    )
+
+    server = uvicorn.Server(config)
+    await server.serve()
+
+async def main():
+    # Запускаем сервер и бота параллельно
+    server_task = asyncio.create_task(run_server())
+    bot_task = asyncio.create_task(bot_main())
+
+    # Ожидаем завершения обеих задач
+    await asyncio.gather(server_task, bot_task)
 
 if __name__ == "__main__":
-    threading.Thread(target=run_server, daemon=True).start()
-    asyncio.run(bot_main())
+    asyncio.run(main())

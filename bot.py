@@ -6,6 +6,7 @@ from utils import queue_watcher
 
 API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
 
+
 async def main():
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher()
