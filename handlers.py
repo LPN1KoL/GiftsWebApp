@@ -37,10 +37,7 @@ async def handle_start(message: Message):
         ],
         resize_keyboard=True
     )
-    await message.answer(
-        "Добро пожаловать! Ваши монеты: 0. Для пополнения отправьте число (сколько звёзд хотите обменять на монеты, 1 к 1).",
-        reply_markup=keyboard
-    )
+    await message.answer("🎁 Приветсвуем тебя в нашей игре!", reply_markup=keyboard)
 
 @router.message(F.text == "/paysupport")
 async def paysupport(message: types.Message):
