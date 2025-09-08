@@ -62,6 +62,15 @@ async def serve_static_files(filename: str):
     raise HTTPException(status_code=404, detail="File not found")
 
 
+@app.get("/data/cases.json")
+async def serve_static_files():
+    if os.path.isfile('/data/cases.json'):
+        return FileResponse('/data/cases.json')
+
+    # Если файл не найден
+    raise HTTPException(status_code=404, detail="File not found")
+
+
 @app.post("/api/get_balance")
 async def handle_get_balance(request: Request):
     data = await request.json()
