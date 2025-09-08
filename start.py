@@ -11,6 +11,7 @@ from db import get_user, update_user_balance_and_gifts
 from cases import try_open_case
 from bot import main as bot_main
 from api import *
+import json
 
 app = FastAPI(title="Gifts App API")
 
@@ -26,6 +27,7 @@ app.add_middleware(
 # Монтирование статических файлов
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
+app.mount("/data", StaticFiles(directory="data"), name="data")
 
 
 # --- Роутинг ---
@@ -63,12 +65,12 @@ async def serve_static_files(filename: str):
 
 
 @app.get("/data/cases.json")
-async def serve_static_files():
-    if os.path.isfile('/data/cases.json'):
+async def load_cases_data():
+    try:
         return FileResponse('/data/cases.json')
-
-    # Если файл не найден
-    raise HTTPException(status_code=404, detail="File not found")
+    except:
+        # Если файл не найден
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.post("/api/get_balance")
