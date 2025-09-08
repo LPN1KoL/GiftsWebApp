@@ -28,6 +28,7 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.mount("/templates", StaticFiles(directory="templates"), name="templates")
 app.mount("/data", StaticFiles(directory="data"), name="data")
+app.mount("/media", StaticFiles(directory="templates"), name="templates")
 
 
 # --- Роутинг ---
@@ -35,17 +36,29 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 async def serve_root():
     return FileResponse("templates/main.html")
 
+
 @app.get("/main.html", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse("templates/main.html")
+
 
 @app.get("/cases.html", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse("templates/cases.html")
 
+
 @app.get("/profile.html", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse("templates/profile.html")
+
+
+@app.get("/media/{filename}")
+async def load_cases_data(filename):
+    try:
+        return FileResponse(os.path.join('/media', filename))
+    except:
+        # Если файл не найден
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.get("/{filename}")
