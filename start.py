@@ -4,8 +4,13 @@ import json
 import asyncio
 import threading
 import os
-from bot import send_plus_prompt, send_queue, get_user_balance_sync, try_open_case_sync, get_user_profile_data_sync
+from utils import send_queue
+from db import get_user_balance_sync, get_user_profile_data_sync
+from db import get_user, update_user_balance_and_gifts
+from cases import try_open_case_sync
+from utils import send_plus_prompt
 from bot import main as bot_main
+from api import send_win_notification_to_admin_sync
 
 HOST = "0.0.0.0"
 HTTP_PORT = 8080
@@ -37,7 +42,13 @@ def handle_open_case(data):
     if not user_id:
         return 400, {"error": "Missing 'user_id'"}
 
-    result = try_open_case_sync(user_id, case_id)
+    result = try_open_case_sync(
+        user_id,
+        case_id,
+        get_user,
+        update_user_balance_and_gifts,
+        send_win_notification_to_admin_sync
+    )
     if "error" in result:
         return 400, {"error": result["error"]}
 

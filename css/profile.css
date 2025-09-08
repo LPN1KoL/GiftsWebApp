@@ -78,105 +78,6 @@ html, body{
     tap-highlight-color: transparent;
 }
 
-.modal{
-    position: fixed;
-    border-radius: 3vw;
-    background-color: rgba(255, 255, 255, 0.15);
-    -webkit-backdrop-filter: blur(80px);
-    backdrop-filter: blur(80px);
-    padding: 1vh 2vw;
-    width: 80vw;
-    height: 60vh;
-    margin: 19vh 9vw;
-    z-index: 10000;
-    position: fixed;
-    display: grid;
-    grid-template-columns: 100%;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
-    transform: scale(0.5);
-    transition: transform 0.3s ease;
-    box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
-}
-
-.modal.active {
-    transform: scale(1);
-    opacity: 1;
-    visibility: visible;
-}
-
-.modal > .img{
-    width: 100%;
-    height: 30vh;
-    display: flex;
-    aspect-ratio: 1 / 1;
-    justify-content: center;
-}
-
-.modal > .img > img{
-    max-height: 100%;
-    max-width: 100%;
-    object-fit: contain;
-}
-
-#get_gift{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 1vh 2vw;
-    background-color: #3281dc;
-    color: white;
-    font-size: 2vh;
-    border: none;
-    border-radius: 3vw;
-}
-
-#close{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 0 2vw;
-    background-color: inherit;
-    color: #cc3623;
-    font-size: 2vh;
-    border: 4px solid #cc3623;
-    border-radius: 3vw;
-}
-
-#sell_gift{
-    width: calc(100% - 4vw);
-    height: 6vh;
-    margin: 1vh 2vw;
-    background-color: #4ABD33;
-    color: white;
-    font-size: 2vh;
-    border: none;
-    border-radius: 3vw;
-}
-
-.holder{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-}
-
-.holder > .count > h2{
-    color: #cddbeb;
-    font-size: 3vh;
-    margin: 0;
-    margin-top: 0.5vh;
-}
-
-.holder > .stars{
-    height: 3vh;
-}
-
-.holder > .stars > img{
-    height: 100%;
-}
-
-/* ------- Стили страницы ------*/
-
 .profile{
     width: 100%;
     min-height: 25vh;
@@ -425,86 +326,6 @@ html, body{
     width: 100%;
 }
 
-.prog4 {
-    width: 4%;
-}
-
-.prog8 {
-    width: 8%;
-}
-
-.prog12 {
-    width: 12%;
-}
-
-.prog16 {
-    width: 16%;
-}
-
-.prog24 {
-    width: 24%;
-}
-
-.prog28 {
-    width: 28%;
-}
-
-.prog32 {
-    width: 32%;
-}
-
-.prog36 {
-    width: 36%;
-}
-
-.prog44 {
-    width: 44%;
-}
-
-.prog48 {
-    width: 48%;
-}
-
-.prog52 {
-    width: 52%;
-}
-
-.prog56 {
-    width: 56%;
-}
-
-.prog64 {
-    width: 64%;
-}
-
-.prog68 {
-    width: 68%;
-}
-
-.prog72 {
-    width: 72%;
-}
-
-.prog76 {
-    width: 76%;
-}
-
-.prog84 {
-    width: 84%;
-}
-
-.prog88 {
-    width: 88%;
-}
-
-.prog92 {
-    width: 92%;
-}
-
-.prog96 {
-    width: 96%;
-}
-
 .reward{
     padding-left: 2vw;
     width: calc(100% - 2vw);
@@ -601,7 +422,70 @@ h2.name{
     align-items: center;
 }
 
+.modal{
+    position: fixed;
+    border-radius: 3vw;
+    background-color: rgba(255, 255, 255, 0.15);
+    -webkit-backdrop-filter: blur(80px);
+    backdrop-filter: blur(80px);
+    padding: 1vh 2vw;
+    width: 80vw;
+    height: 60vh;
+    margin: 19vh 9vw;
+    z-index: 10000;
+    position: fixed;
+    display: grid;
+    grid-template-columns: 100%;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    transform: scale(0.5);
+    transition: transform 0.3s ease;
+    box-shadow: 0 0 0 100vh rgba(0, 0, 0, 0.4);
+}
 
+.modal.active {
+    transform: scale(1);
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal > .img{
+    width: 100%;
+    height: 35vh;
+    display: flex;
+    aspect-ratio: 1 / 1;
+    justify-content: center;
+}
+
+.modal > .img > img{
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+#get_gift{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 1vh 2vw;
+    background-color: #3281dc;
+    color: white;
+    font-size: 2vh;
+    border: none;
+    border-radius: 3vw;
+}
+
+#close{
+    width: calc(100% - 4vw);
+    height: 6vh;
+    margin: 0 2vw;
+    background-color: inherit;
+    color: #cc3623;
+    font-size: 2vh;
+    border: 4px solid #cc3623;
+    border-radius: 3vw;
+}
 
 .gift-img{
     width: 100%;
@@ -665,39 +549,23 @@ h2.name{
     align-items: center;
 }
 
-
-
-.sub-block > h1{
-    margin: 0;
-    color: #cddbeb;
-    font-size: 2vh;
-}
-
-.sub-block{
+.holder{
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
-.sub-block > a{
-    color: #3281dc;
-    font-size: 2vh;
-    margin-left: 1vw;
+.holder > .count > h2{
+    color: #cddbeb;
+    font-size: 3vh;
+    margin: 0;
+    margin-top: 0.5vh;
 }
 
-.sub-block{
-    position: relative;
-    left: 2vw;
+.holder > .stars{
+    height: 3vh;
 }
 
-.starrs{
-    aspect-ratio: 1 / 1; /* Соотношение сторон 1:1 */
-    height: 3.5vh; /* или фиксированная ширина */
-    overflow: hidden; /* Обрезаем лишнее */
-    max-width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.holder > .stars > img{
+    height: 100%;
 }
-
-
