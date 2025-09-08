@@ -29,8 +29,8 @@ async function plus_func(){
     }
 
     try {
-        await sendApiRequest('/api/plus', { user_id });
-        alert("Запрос успешно отправлен!");
+        window.Telegram?.WebApp?.sendData(JSON.stringify({ foo: "donate" }));
+        window.Telegram?.WebApp?.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }

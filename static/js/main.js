@@ -1,3 +1,5 @@
+window.Telegram?.WebApp?.expand();
+
 let selectedCase = null;
 const SLIDER_LENGTH = 32;
 const WIN_INDEX = 29; // индекс выигрышной карточки
