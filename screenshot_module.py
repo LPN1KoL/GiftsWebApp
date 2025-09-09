@@ -13,7 +13,7 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=1080,720")
+    chrome_options.add_argument("--window-size=640,360")
     
     try:
         # Запускаем браузер
