@@ -20,6 +20,9 @@ html, body{
     margin: 0px;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
 
 .main{
     height: 100vh;
