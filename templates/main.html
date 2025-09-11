@@ -40,7 +40,7 @@
                     {% for gift in random_gifts %}
                         <div class="card">
                             <div class="gift-img">
-                                <img class="gimg" src="{{ gift.img }}" alt="Подарок">
+                                <img class="gimg" src="{{ gift.image }}" alt="Подарок">
                             </div>
                             <h2 class="name">{{ gift.name }}</h2>
                             <div class="price">
@@ -68,7 +68,7 @@
             {% for gift in gifts %}
                 <div class="card">
                     <div class="gift-img">
-                        <img class="gimg" src="{{ gift.img }}" alt="Подарок">
+                        <img class="gimg" src="{{ gift.image }}" alt="Подарок">
                     </div>
                     <h2 class="name">{{ gift.chance*100 }} %</h2>
                     <div class="price">

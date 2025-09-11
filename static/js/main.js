@@ -235,7 +235,7 @@ function sleep(ms) {
 
 //document.addEventListener('DOMContentLoaded', loadCaseData);
 
-const container = document.getElementById('case-container');
+const container = document.getElementById('data-block');
 const caseId = container.dataset.caseId;
 const caseName = container.dataset.caseName;
 const casePrice = container.dataset.casePrice;
