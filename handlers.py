@@ -9,6 +9,8 @@ from db import *
 from cases import *
 from api import *
 from utils import send_queue, payments
+from utils import take_screenshot_and_process
+
 
 
 API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
@@ -61,10 +63,10 @@ async def handle_start(message: Message):
 async def paysupport(message: types.Message):
     await message.answer("Вопросы по оплате Telegram Stars — @support_username")
 
-@router.callback_query(lambda c: c.web_app_data is not None)
-async def handle_webapp_data(callback: CallbackQuery):
-    await callback.answer('Запрос на платеж принят')
-    await callback.bot.send_message(chat_id=callback.from_user.id, text='Введите число звезд, которое хотите заплатить')
+#@router.callback_query(lambda c: c.web_app_data is not None)
+#async def handle_webapp_data(callback: CallbackQuery):
+#    await callback.answer('Запрос на платеж принят')
+#   await callback.bot.send_message(chat_id=callback.from_user.id, text='Введите число звезд, которое хотите заплатить')
 
 @router.message(lambda m: m.text is not None and m.text.isdigit())
 async def create_invoice(message: types.Message):
@@ -314,7 +316,8 @@ async def handle_gift_add(callback: CallbackQuery):
         "name": "Новый подарок",
         "link": "https://example.com/gift",
         "img": "/media/gift.png",
-        "chance": 0.1
+        "chance": 0.1,
+        "price": 100
     }
     case["gifts"].append(new_gift)
     save_cases(cases)
@@ -340,10 +343,11 @@ async def handle_gift_edit(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
         f"🎁 Редактирование подарка: {gift['name']}\n\n"
         f"Отправьте данные в формате:\n"
-        f"<code>Название\nШанс (0.0-1.0)</code>\n\n"
+        f"<code>Название\nШанс (0.0-1.0)\nЦена (число)</code>\n\n"
         f"Текущие данные:\n"
         f"Название: {gift['name']}\n"
         f"Шанс: {gift['chance']}\n"
+        f"Цена: {gift.get('price', 'Не указана')}\n"
         f"Ссылка: {gift.get('link', 'Не указана')}\n\n"
         f"После этого отправьте новую ссылку для скриншота (если нужно)"
     )
@@ -355,25 +359,47 @@ async def handle_gift_info_input(message: Message, state: FSMContext):
         case_id = data['case_id']
         gift_id = data['gift_id']
         lines = message.text.split('\n')
-        if len(lines) < 2:
-            await message.answer("❌ Неверный формат. Нужно: Название\\nШанс")
+
+        if len(lines) < 3:
+            await message.answer("❌ Неверный формат. Нужно: Название\nШанс\nЦена")
             return
+
         name = lines[0].strip()
         chance = float(lines[1].strip())
         if not 0 <= chance <= 1:
             await message.answer("❌ Шанс должен быть между 0 и 1")
             return
-        await state.update_data(gift_name=name, gift_chance=chance)
+
+        try:
+            price = int(lines[2].strip())
+            if price < 0:
+                await message.answer("❌ Цена не может быть отрицательной")
+                return
+        except ValueError:
+            await message.answer("❌ Цена должна быть целым числом")
+            return
+
+        await state.update_data(
+            gift_name=name,
+            gift_chance=chance,
+            gift_price=price
+        )
         await state.set_state(GiftEditState.waiting_for_gift_url)
+
         await message.answer(
-            "✅ Данные приняты! Теперь отправьте новую ссылку для подарка "
-            "(или отправьте 'пропустить' чтобы оставить текущую)"
+            "✅ Данные приняты!\n"
+            f"Название: {name}\n"
+            f"Шанс: {chance}\n"
+            f"Цена: {price}\n\n"
+            "Теперь отправьте новую ссылку для подарка "
+            "(или отправьте 'пропустить', чтобы оставить текущую)"
         )
     except ValueError:
-        await message.answer("❌ Шанс должен быть числом (например: 0.3)")
+        await message.answer("❌ Шанс и цена должны быть числами (например: 0.3 и 150)")
     except Exception as e:
         await message.answer(f"❌ Ошибка: {e}")
         await state.clear()
+
 
 @router.message(GiftEditState.waiting_for_gift_url)
 async def handle_gift_url_input(message: Message, state: FSMContext):
@@ -394,7 +420,7 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
                 if new_url:
                     gift['link'] = new_url
                     # Запускаем создание иконки в фоне
-                    asyncio.create_task(create_gift_icon_with_notification(gift, case, message.chat.id))
+                    asyncio.create_task(create_gift_icon_with_notification(message.bot, gift, case, message.chat.id))
                     await message.answer("⏳ Создаю иконку из ссылки... Это может занять несколько секунд")
                 else:
                     await message.answer("✅ Подарок обновлен (ссылка не изменена)!")
@@ -407,7 +433,7 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
         await message.answer(f"❌ Ошибка: {e}")
     await state.clear()
 
-async def create_gift_icon_with_notification(gift, case, chat_id):
+async def create_gift_icon_with_notification(bot: Bot, gift, case, chat_id):
     try:
         await create_gift_icon(gift, take_screenshot_and_process)
         await update_case_icon(case)
@@ -416,11 +442,12 @@ async def create_gift_icon_with_notification(gift, case, chat_id):
         if current_case:
             current_case['gifts'] = [g if g['id'] != gift['id'] else gift for g in current_case['gifts']]
             save_cases(cases)
-        await router.bot.send_message(chat_id, f"✅ Иконка для подарка '{gift['name']}' создана успешно!")
+        await bot.send_message(chat_id, f"✅ Иконка для подарка '{gift['name']}' создана успешно!")
     except Exception as e:
         error_msg = f"❌ Ошибка при создании иконки: {e}"
         print(error_msg)
-        await router.bot.send_message(chat_id, error_msg)
+        await bot.send_message(chat_id, error_msg)
+
 
 # --- Кнопка "Готово" у уведомления админа ---
 @router.callback_query(F.data.startswith("done_"))

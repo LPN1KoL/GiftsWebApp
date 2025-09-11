@@ -90,9 +90,9 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
     await asyncio.to_thread(send_admin_notification, user_id, selected_gift, case_id)
     return {
         "gift": {
-            "id": selected_gift["id"],
-            "name": selected_gift.get("name", ""),
-            "img": selected_gift.get("img", ""),
-            "link": selected_gift.get("link", "")
+            "id": gift["id"],
+            "name": gift["name"],
+            "img": gift["img"],
+            "price": gift.get("price", 0)
         }
     }

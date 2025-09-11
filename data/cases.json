@@ -11,14 +11,16 @@
         "name": "Скрепка",
         "link": "https://example.com/gift1",
         "img": "/media/1.png",
-        "chance": 0.3
+        "chance": 0.3,
+        "price": 1
       },
       {
         "id": "kalendar",
         "name": "Календарь",
         "link": "https://example.com/gift2",
         "img": "/media/2.png",
-        "chance": 0.7
+        "chance": 0.7,
+        "price": 1
       }
     ]
   },
@@ -34,7 +36,25 @@
         "name": "Пепе Паши",
         "link": "https://t.me/nft/PlushPepe-858",
         "img": "/media/gifts/gift-1-2467.png",
-        "chance": 0.49
+        "chance": 0.49,
+        "price": 1
+      }
+    ]
+  },
+  {
+    "id": "case-3",
+    "category": "basic",
+    "name": "Новый кейс 3",
+    "price": 100,
+    "logo": "/media/gifts/gift-1-9806.png",
+    "gifts": [
+      {
+        "id": "gift-1-9806",
+        "name": "123",
+        "link": "https://t.me/nft/PlushPepe-858",
+        "img": "/media/gifts/gift-1-9806.png",
+        "chance": 1.0,
+        "price": 100
       }
     ]
   }
