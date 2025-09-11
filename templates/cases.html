@@ -73,7 +73,7 @@
     
     <div class="slider">
         <div class="sections">
-            <a href="/">
+            <a id="main_link" href="/main">
                 <div class="section">
                     <i class="material-symbols-outlined">home</i>
                     <span class="span-sec">Главная</span>
@@ -95,5 +95,12 @@
     </div>
 </div>
 
+<script>
+    //Обновляем ссылку на кейс
+    if (localStorage.getItem('case_id')) {
+        caseId = localStorage.getItem('case_id');
+        document.getElementById('main_link').href = `/main?case_id=${caseId}`;
+    }
+</script>
 </body>
 </html>

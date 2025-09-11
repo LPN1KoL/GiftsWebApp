@@ -148,11 +148,17 @@ async def serve_main(request: Request):
     if case_id:
         print(f"Запрошен case_id: {case_id}")
         data = await get_case_complete_data(case_id)
-        return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
+        if data:
+            return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
+        else:
+            raise HTTPException(status_code=404, detail="Case not found")
     else:
         data = await get_case_complete_data("case-1")
-        return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
-
+        if data:
+            return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
+        else:
+            raise HTTPException(status_code=404, detail="Case not found")
+ 
 
 @app.get("/cases", response_class=HTMLResponse)
 async def cases_page(request: Request):

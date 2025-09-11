@@ -6,10 +6,30 @@ const WIN_INDEX = 29; // индекс выигрышной карточки
 const CARD_WIDTH = 35; // vw
 const CARD_MARGIN = 4;
 const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
+const container = document.getElementById('data-block');
+const caseName = container.dataset.caseName;
+const casePrice = container.dataset.casePrice;
+const gifts = JSON.parse(container.dataset.gifts);
+const params = new URLSearchParams(window.location.search);
+
+caseId = params.get('case_id');
+if (!caseId) {
+    if (!localStorage.getItem('case_id')) {
+        caseId = container.dataset.caseId;
+        localStorage.setItem('case_id', caseId);
+    }
+} else {
+    localStorage.setItem('case_id', caseId);
+}
+
+if (localStorage.getItem('case_id')) {
+    caseId = localStorage.getItem('case_id');
+    document.getElementById("main_link").href = "/main?case_id=" + caseId;
+}
 
 // Получаем user_id из Telegram WebApp или используем тестовый
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-localStorage.setItem("user_id", user_id);
+
 
 
 async function sendApiRequest(endpoint, data) {
@@ -91,11 +111,8 @@ function renderSlider(giftsArr, highlightIndex = null) {
 }
 
 async function loadCaseData() {
-    const params = new URLSearchParams(window.location.search);
-    caseId = params.get('case_id');
-    if (!caseId) {
-        caseId = "basic1"
-    }
+    
+    
 
     try {
         const response = await fetch('/data/cases.json');
@@ -235,12 +252,4 @@ function sleep(ms) {
 
 //document.addEventListener('DOMContentLoaded', loadCaseData);
 
-const container = document.getElementById('data-block');
-const caseId = container.dataset.caseId;
-const caseName = container.dataset.caseName;
-const casePrice = container.dataset.casePrice;
-const gifts = JSON.parse(container.dataset.gifts);
 
-console.log('Case ID:', caseId);
-console.log('Gifts:', gifts);
-console.log('Price:', casePrice);

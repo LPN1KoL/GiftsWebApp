@@ -70,7 +70,7 @@
                     <div class="gift-img">
                         <img class="gimg" src="{{ gift.image }}" alt="Подарок">
                     </div>
-                    <h2 class="name">{{ gift.chance*100 }} %</h2>
+                    <h2 class="name">{{ (gift.chance*100) | int }} %</h2>
                     <div class="price">
                         <div class="pc">
                             <div class="starss">
@@ -94,7 +94,7 @@
     </div>
     <div class="slider">
         <div class="sections">
-            <a href="/main">
+            <a id="main_link" href="/main">
                 <div class="section active">
                     <i class="material-symbols-outlined">home</i>
                     <span class="span-sec">Главная</span>

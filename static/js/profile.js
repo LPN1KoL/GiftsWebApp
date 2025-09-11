@@ -49,6 +49,12 @@ async function updateProfile() {
             avatarElement.src = tg.initDataUnsafe.user.photo_url;
         }
 
+        //Обновляем ссылку на кейс
+        if (localStorage.getItem('case_id')) {
+            caseId = localStorage.getItem('case_id');
+            document.getElementById('main_link').href = `/main?case_id=${caseId}`;
+        }
+
         // Отображаем подарки
         const cardList = document.querySelector('.card-list');
         if (cardList) {
