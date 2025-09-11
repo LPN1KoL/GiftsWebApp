@@ -64,23 +64,9 @@ async def paysupport(message: types.Message):
     await message.answer("Вопросы по оплате Telegram Stars — @support_username")
 
 
-@router.message()
+@router.message(F.web_app_data)
 async def handle_webapp_data(message: types.Message):
-    print(message)
-    await message.answer('from message')
-
-
-@router.message(F.content_type == types.ContentType.WEB_APP_DATA)
-async def handle_webapp_data(message: types.Message):
-    print(message)
     await message.answer('Введите число звезд, которое хотите заплатить')
-
-
-
-@router.callback_query(F.content_type == types.ContentType.WEB_APP_DATA)
-async def handle_webapp_data(call):
-    print(call)
-    await call.message.bot.send_message(call.from_user.id, 'from callback')
     
 
 @router.message(lambda m: m.text is not None and m.text.isdigit())
