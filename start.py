@@ -103,13 +103,17 @@ async def get_random_gifts(case_id, length):
                 cumulative = 0
                 selected_gift = None
 
-                for gift in case["gifts"]:
-                    cumulative += gift["chance"]
+                for gift in case.get("gifts", []):
+                    chance = gift.get("chance")
+                    if chance is None:
+                        continue
+
+                    cumulative += chance
                     if rnd <= cumulative:
                         selected_gift = gift
                         break
                 if not selected_gift:
-                    selected_gift = case["gifts"][-1]
+                    selected_gift = case.get("gifts", [])[-1]
 
                 gifts.append({
                     "id": selected_gift.get("id"),
