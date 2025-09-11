@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
 import uvicorn
 import ssl
 import asyncio
@@ -14,6 +15,7 @@ from api import *
 import json
 
 app = FastAPI(title="Gifts App API")
+templates = Jinja2Templates(directory="templates")
 
 # Настройка CORS
 app.add_middleware(
@@ -31,29 +33,65 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
+async def load_cases_data():
+    try:
+        with open("data/cases.json", "r", encoding="utf-8") as f:
+            cases = json.load(f)
+            
+            # Фильтруем только нужные поля
+            filtered_cases = []
+            for case in cases:
+                filtered_case = {
+                    "id": case.get("id"),
+                    "name": case.get("name"),
+                    "price": case.get("price"),
+                    "logo": case.get("logo"),
+                    "category": case.get("category")
+                }
+                filtered_cases.append(filtered_case)
+            
+            return filtered_cases
+            
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Ошибка загрузки cases.json: {e}")
+        return []
+
+
 # --- Роутинг ---
 @app.get("/", response_class=HTMLResponse)
 async def serve_root():
     return FileResponse("templates/main.html")
 
 
-@app.get("/main.html", response_class=HTMLResponse)
+@app.get("/main", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse("templates/main.html")
 
 
-@app.get("/cases.html", response_class=HTMLResponse)
-async def serve_index():
-    return FileResponse("templates/cases.html")
+@app.get("/cases", response_class=HTMLResponse)
+async def cases_page(request: Request):
+    cases_data = await load_cases_data()
+    
+    # Разделяем кейсы по категориям
+    basic_cases = [case for case in cases_data if case.get('category') == 'basic']
+    allin_cases = [case for case in cases_data if case.get('category') == 'allin']
+    
+    return templates.TemplateResponse(
+        "templates/cases.html",
+        {
+            "basic_cases": basic_cases,
+            "allin_cases": allin_cases
+        }
+    )
 
 
-@app.get("/profile.html", response_class=HTMLResponse)
+@app.get("/profile", response_class=HTMLResponse)
 async def serve_index():
     return FileResponse("templates/profile.html")
 
 
 @app.get("/media/{filename}")
-async def load_cases_data(filename):
+async def get_media_file(filename):
     try:
         return FileResponse(os.path.join('/media', filename))
     except:

@@ -44,4 +44,4 @@ async function loadCases() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', loadCases);
+//document.addEventListener('DOMContentLoaded', loadCases);
