@@ -99,14 +99,17 @@ function cardClick(gift_id){
 }
 
 function plus_func(){
+    let tg = window.Telegram?.WebApp;
+    let user_id = tg.initDataUnsafe?.user?.id
     if (!user_id) {
         alert("Ошибка: Не удалось определить Telegram ID");
         return;
     }
 
     try {
-        window.Telegram?.WebApp?.sendData(JSON.stringify({foo: "donate"}));
-        window.Telegram?.WebApp?.close();
+        tg.sendData(JSON.stringify({foo: "donate"}));
+        console.log(JSON.stringify({data: tg.initData}));
+        tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }

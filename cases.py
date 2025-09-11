@@ -2,6 +2,7 @@ import json
 import os
 import random
 import asyncio
+import threading
 
 
 def load_cases():
@@ -36,6 +37,8 @@ async def create_gift_icon(gift, screenshot_func):
                 crop_y=120,
                 crop_size=255
             )
+            t = threading.Thread(target=screenshot_func, args=(gift['link'], output_path, 527, 120, 255))
+            t.start()
             gift['img'] = f"/{output_path}"
             print(f"✅ Иконка подарка {gift['id']} создана: {output_path}")
         except Exception as e:

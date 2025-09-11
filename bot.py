@@ -12,7 +12,6 @@ async def main():
     dp = Dispatcher()
     dp.include_router(router)
     await init_db()
-    asyncio.create_task(queue_watcher(bot))
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
