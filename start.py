@@ -206,11 +206,14 @@ async def run_server():
 
 async def main():
     # Запускаем сервер и бота параллельно
-    server_task = asyncio.create_task(run_server())
-    bot_task = asyncio.create_task(bot_main())
+    try:
+        server_task = asyncio.create_task(run_server())
+        bot_task = asyncio.create_task(bot_main())
 
-    # Ожидаем завершения обеих задач
-    await asyncio.gather(server_task, bot_task)
+        # Ожидаем завершения обеих задач
+        await asyncio.gather(server_task, bot_task)
+    except KeyboardInterrupt:
+        print("Server and Bot stopped")
 
 if __name__ == "__main__":
     asyncio.run(main())

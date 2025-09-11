@@ -63,7 +63,7 @@
     "category": "basic",
     "name": "Новый кейс 1",
     "price": 100,
-    "logo": "/media/default.png",
+    "logo": "/media/img.png",
     "gifts": [
       {
         "id": "gift-1-6626",
