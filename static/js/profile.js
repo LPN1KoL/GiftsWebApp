@@ -114,15 +114,8 @@ function plus_func(){
     }
 
     try {
-        // Подписываемся на событие отправки данных
-        tg.onEvent('webAppDataReceived', () => {
-            console.log('Данные успешно получены ботом');
-            setTimeout(() => tg.close(), 1000);
-        });
-
-        // Отправляем данные
         tg.sendData(JSON.stringify({action: "donate",}));
-        
+        tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }
