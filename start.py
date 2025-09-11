@@ -64,7 +64,7 @@ async def serve_root():
 
 
 @app.get("/main", response_class=HTMLResponse)
-async def serve_index():
+async def serve_main():
     return FileResponse("templates/main.html")
 
 
@@ -77,7 +77,7 @@ async def cases_page(request: Request):
     allin_cases = [case for case in cases_data if case.get('category') == 'allin']
     
     return templates.TemplateResponse(
-        "templates/cases.html",
+        "cases.html",
         {
             "basic_cases": basic_cases,
             "allin_cases": allin_cases
@@ -86,7 +86,7 @@ async def cases_page(request: Request):
 
 
 @app.get("/profile", response_class=HTMLResponse)
-async def serve_index():
+async def serve_profile():
     return FileResponse("templates/profile.html")
 
 
@@ -116,7 +116,7 @@ async def serve_static_files(filename: str):
 
 
 @app.get("/data/cases.json")
-async def load_cases_data():
+async def load_cases():
     try:
         return FileResponse('/data/cases.json')
     except:
