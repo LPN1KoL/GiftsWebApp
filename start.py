@@ -136,6 +136,7 @@ async def get_random_gifts(case_id, length):
 async def serve_main(request: Request):
     case_id = request.query_params.get("case_id")
     if case_id:
+        print(f"Запрошен case_id: {case_id}")
         return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": await load_cases_gifts(case_id), "random_gifts": await get_random_gifts(case_id, 32)})
     else:
         return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": await load_cases_gifts("case-1"), "random_gifts": await get_random_gifts("case-1", 32)})
