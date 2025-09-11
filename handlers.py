@@ -66,7 +66,6 @@ async def paysupport(message: types.Message):
 
 @router.message(F.content_type == types.ContentType.WEB_APP_DATA)
 async def handle_webapp_data(message: types.Message):
-    print("WebApp Data:", message.web_app_data.data)
     await message.answer('Введите число звезд, которое хотите заплатить')
 
 
@@ -76,7 +75,7 @@ async def handle_webapp_data(message: types.Message):
     await message.answer('from message')
 
 
-@router.callback_query()
+@router.callback_query(F.content_type == types.ContentType.WEB_APP_DATA)
 async def handle_webapp_data(call):
     print(call)
     await call.message.bot.send_message(call.from_user.id, 'from callback')
