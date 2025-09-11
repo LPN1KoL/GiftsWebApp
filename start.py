@@ -80,7 +80,8 @@ async def cases_page(request: Request):
         "cases.html",
         {
             "basic_cases": basic_cases,
-            "allin_cases": allin_cases
+            "allin_cases": allin_cases,
+            "request": request
         }
     )
 
