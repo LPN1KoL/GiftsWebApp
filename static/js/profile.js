@@ -102,16 +102,27 @@ function cardClick(gift_id){
 }
 
 function plus_func(){
-    let tg = window.Telegram?.WebApp;
-    let user_id = tg.initDataUnsafe?.user?.id
+    if (!tg) {
+        alert("WebApp не инициализирован");
+        return;
+    }
+
+    const user_id = tg.initDataUnsafe?.user?.id;
     if (!user_id) {
         alert("Ошибка: Не удалось определить Telegram ID");
         return;
     }
 
     try {
-        tg.sendData(JSON.stringify({foo: "donate"}));
-        tg.close();
+        // Подписываемся на событие отправки данных
+        tg.onEvent('webAppDataReceived', () => {
+            console.log('Данные успешно получены ботом');
+            setTimeout(() => tg.close(), 1000);
+        });
+
+        // Отправляем данные
+        tg.sendData(JSON.stringify({action: "donate",}));
+        
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }
