@@ -234,3 +234,13 @@ function sleep(ms) {
 
 
 //document.addEventListener('DOMContentLoaded', loadCaseData);
+
+const container = document.getElementById('case-container');
+const caseId = container.dataset.caseId;
+const caseName = container.dataset.caseName;
+const casePrice = container.dataset.casePrice;
+const gifts = JSON.parse(container.dataset.gifts);
+
+console.log('Case ID:', caseId);
+console.log('Gifts:', gifts);
+console.log('Price:', casePrice);

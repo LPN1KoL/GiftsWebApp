@@ -31,7 +31,7 @@
 
 <div class="main">
     <div class="content">
-        <h1 id="case_name"></h1>
+        <h1 id="case_name">{% case_data.name %}</h1>
 
         <div class="case">
             <div class="window">
@@ -83,6 +83,12 @@
                     </div>
                 </div>
             {% endfor %}
+            <div id="data-block" 
+                data-case-id="{{ case_id }}"
+                data-case-name="{{ case_data.name }}"
+                data-case-price="{{ case_data.price }}"
+                data-gifts='{ gifts | tojson }'>
+            </div>
         </div>
 
     </div>
@@ -113,7 +119,8 @@
 
 </div>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-<script src="/static/js/main.js"></script>
+<script src="/static/js/main.jss"></script>
+
 
 </body>
 </html>

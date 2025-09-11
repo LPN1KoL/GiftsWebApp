@@ -59,72 +59,82 @@ async def load_cases_data():
         return []
     
 
-async def load_cases_gifts(case_id):
+async def get_case_complete_data(case_id, random_length=32):
+    """
+    Универсальная функция для получения всех данных о кейсе за одно чтение файла
+    :param case_id: ID кейса
+    :param random_length: Количество случайных подарков (по умолчанию 32)
+    :return: Словарь с тремя ключами: case_data, gifts, random_gifts
+             или None если кейс не найден
+    """
     try:
         with open("data/cases.json", "r", encoding="utf-8") as f:
             cases = json.load(f)
-            gifts = []
-            result = []
+            
+            # Ищем нужный кейс
+            target_case = None
             for case in cases:
                 if case.get("id") == case_id:
-                    gifts = case.get("gifts", [])
+                    target_case = case
                     break
-            for gift in gifts:
-                result.append({
+            
+            if not target_case:
+                return None
+            
+            result = {}
+            gifts_list = target_case.get("gifts", [])
+            
+            # 1. Данные кейса
+            result["case_data"] = {
+                "id": target_case.get("id"),
+                "name": target_case.get("name"),
+                "price": target_case.get("price"),
+                "logo": target_case.get("logo")
+            }
+            
+            # 2. Список всех подарков с fake_chance
+            result["gifts"] = []
+            for gift in gifts_list:
+                result["gifts"].append({
                     "id": gift.get("id"),
                     "name": gift.get("name"),
-                    "image": gift.get("image"),
+                    "image": gift.get("img"),  
                     "price": gift.get("price"),
                     "chance": gift.get("fake_chance")
                 })
-
-            return result
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Ошибка загрузки cases.json: {e}")
-        return []
-
-
-async def get_random_gifts(case_id, length):
-    try:
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            cases = json.load(f)
-            gifts = []
-            for case in cases:
-                if case.get("id") == case_id:
-                    gifts = case.get("gifts", [])
-                    break
-            if not gifts:
-                return None
             
-            for _ in range(length):
+            # 3. Список из 32 случайных подарков
+            result["random_gifts"] = []
+            
+            if gifts_list:  # Если есть подарки в кейсе
+                for _ in range(random_length):
+                    # Выбираем подарок на основе шансов
+                    rnd = random.random()
+                    cumulative = 0
+                    selected_gift = None
 
-                # Выбираем подарок на основе шансов
-                rnd = random.random()
-                cumulative = 0
-                selected_gift = None
+                    for gift in gifts_list:
+                        chance = gift.get("chance")
+                        if chance is None:
+                            continue
+                        cumulative += chance
+                        if rnd <= cumulative:
+                            selected_gift = gift
+                            break
+                    
+                    if not selected_gift:
+                        selected_gift = gifts_list[-1]
 
-                for gift in case.get("gifts", []):
-                    chance = gift.get("chance")
-                    if chance is None:
-                        continue
-
-                    cumulative += chance
-                    if rnd <= cumulative:
-                        selected_gift = gift
-                        break
-                if not selected_gift:
-                    selected_gift = case.get("gifts", [])[-1]
-
-                gifts.append({
-                    "id": selected_gift.get("id"),
-                    "name": selected_gift.get("name"),
-                    "image": selected_gift.get("image"),
-                    "price": selected_gift.get("price"),
-                    "chance": selected_gift.get("fake_chance")
-                })
-
-            return gifts
-        
+                    result["random_gifts"].append({
+                        "id": selected_gift.get("id"),
+                        "name": selected_gift.get("name"),
+                        "image": selected_gift.get("img"),
+                        "price": selected_gift.get("price"),
+                        "chance": selected_gift.get("fake_chance")
+                    })
+            
+            return result
+            
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Ошибка загрузки cases.json: {e}")
         return None
@@ -137,9 +147,11 @@ async def serve_main(request: Request):
     case_id = request.query_params.get("case_id")
     if case_id:
         print(f"Запрошен case_id: {case_id}")
-        return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": await load_cases_gifts(case_id), "random_gifts": await get_random_gifts(case_id, 32)})
+        data = await get_case_complete_data(case_id)
+        return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
     else:
-        return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": await load_cases_gifts("case-1"), "random_gifts": await get_random_gifts("case-1", 32)})
+        data = await get_case_complete_data("case-1")
+        return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": data["gifts"], "random_gifts": data["random_gifts"], "case_data": data["case_data"]})
 
 
 @app.get("/cases", response_class=HTMLResponse)
