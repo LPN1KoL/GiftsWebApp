@@ -70,6 +70,18 @@ async def handle_webapp_data(message: types.Message):
     await message.answer('Введите число звезд, которое хотите заплатить')
 
 
+@router.message()
+async def handle_webapp_data(message: types.Message):
+    print(message)
+    await message.answer('from message')
+
+
+@router.callback_query()
+async def handle_webapp_data(call):
+    print(call)
+    await call.message.bot.send_message(call.from_user.id, 'from callback')
+    
+
 @router.message(lambda m: m.text is not None and m.text.isdigit())
 async def create_invoice(message: types.Message):
     amount = int(message.text)

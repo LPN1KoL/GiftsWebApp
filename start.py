@@ -130,8 +130,6 @@ async def handle_get_profile(request: Request):
         profile_data = await get_user_profile_data(user_id)
         return {
             "balance": profile_data.get("balance", 0),
-            "username": profile_data.get("username", "unknown"),
-            "avatar": await get_user_avatar_base64(user_id),
             "gifts": profile_data.get("gifts", [])
         }
     except Exception as e:

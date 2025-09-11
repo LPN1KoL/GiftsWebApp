@@ -1,5 +1,8 @@
+const tg = window.Telegram?.WebApp;
+tg.expand();
+
 document.addEventListener('DOMContentLoaded', () => {
-	const user_id = localStorage.getItem("user_id");
+	const user_id = tg.initDataUnsafe?.user?.id;
 
 
     const plusButton = document.getElementById('main_button');
@@ -37,13 +40,13 @@ async function updateProfile() {
         // Обновляем ник
         const usernameElement = document.querySelector('.profile h1');
         if (usernameElement) {
-            usernameElement.textContent = '@' + result.username;
+            usernameElement.textContent = '@' + tg.initDataUnsafe.user.username;
         }
 
         // Обновляем аватар
         const avatarElement = document.querySelector('.user-pic img');
         if (avatarElement) {
-            avatarElement.src = result.avatar.toLocaleString();
+            avatarElement.src = tg.initDataUnsafe.user.photo_url;
         }
 
         // Отображаем подарки
@@ -108,7 +111,6 @@ function plus_func(){
 
     try {
         tg.sendData(JSON.stringify({foo: "donate"}));
-        console.log(JSON.stringify({data: tg.initDataUnsafe}));
         tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
