@@ -1,3 +1,4 @@
+from random import random
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -33,6 +34,7 @@ app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
+# --- Вспомогательные функции ---
 async def load_cases_data():
     try:
         with open("data/cases.json", "r", encoding="utf-8") as f:
@@ -55,17 +57,84 @@ async def load_cases_data():
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Ошибка загрузки cases.json: {e}")
         return []
+    
+
+async def load_cases_gifts(case_id):
+    try:
+        with open("data/cases.json", "r", encoding="utf-8") as f:
+            cases = json.load(f)
+            gifts = []
+            result = []
+            for case in cases:
+                if case.get("id") == case_id:
+                    gifts = case.get("gifts", [])
+                    break
+            for gift in gifts:
+                result.append({
+                    "id": gift.get("id"),
+                    "name": gift.get("name"),
+                    "image": gift.get("image"),
+                    "price": gift.get("price"),
+                    "chance": gift.get("fake_chance")
+                })
+
+            return result
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Ошибка загрузки cases.json: {e}")
+        return []
+
+
+async def get_random_gifts(case_id, length):
+    try:
+        with open("data/cases.json", "r", encoding="utf-8") as f:
+            cases = json.load(f)
+            gifts = []
+            for case in cases:
+                if case.get("id") == case_id:
+                    gifts = case.get("gifts", [])
+                    break
+            if not gifts:
+                return None
+            
+            for _ in range(length):
+
+                # Выбираем подарок на основе шансов
+                rnd = random.random()
+                cumulative = 0
+                selected_gift = None
+
+                for gift in case["gifts"]:
+                    cumulative += gift["chance"]
+                    if rnd <= cumulative:
+                        selected_gift = gift
+                        break
+                if not selected_gift:
+                    selected_gift = case["gifts"][-1]
+
+                gifts.append({
+                    "id": selected_gift.get("id"),
+                    "name": selected_gift.get("name"),
+                    "image": selected_gift.get("image"),
+                    "price": selected_gift.get("price"),
+                    "chance": selected_gift.get("fake_chance")
+                })
+
+            return gifts
+        
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Ошибка загрузки cases.json: {e}")
+        return None
 
 
 # --- Роутинг ---
 @app.get("/", response_class=HTMLResponse)
-async def serve_root():
-    return FileResponse("templates/main.html")
-
-
 @app.get("/main", response_class=HTMLResponse)
-async def serve_main():
-    return FileResponse("templates/main.html")
+async def serve_main(request: Request):
+    case_id = request.query_params.get("case_id")
+    if case_id:
+        return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": await load_cases_gifts(case_id), "random_gifts": await get_random_gifts(case_id, 32)})
+    else:
+        return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": await load_cases_gifts("case-1"), "random_gifts": await get_random_gifts("case-1", 32)})
 
 
 @app.get("/cases", response_class=HTMLResponse)

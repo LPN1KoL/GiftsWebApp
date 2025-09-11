@@ -8,7 +8,7 @@ const CARD_MARGIN = 4;
 const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
 
 // Получаем user_id из Telegram WebApp или используем тестовый
-let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
+let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
 localStorage.setItem("user_id", user_id);
 
 
@@ -232,20 +232,5 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Обработчик для кнопки "Пополнить баланс"
-document.getElementById('main_button')?.addEventListener('click', async () => {
-    if (!user_id) {
-        alert("Ошибка: Не удалось определить Telegram ID");
-        return;
-    }
 
-    try {
-        const result = await sendApiRequest('/api/plus', { user_id });
-        alert("Запрос успешно отправлен!");
-        await updateBalance();
-    } catch (err) {
-        alert("Ошибка при отправке: " + err.message);
-    }
-});
-
-document.addEventListener('DOMContentLoaded', loadCaseData);
+//document.addEventListener('DOMContentLoaded', loadCaseData);

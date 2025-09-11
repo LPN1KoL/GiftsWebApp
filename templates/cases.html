@@ -17,7 +17,7 @@
                     <h1>Базовые кейсы</h1>
                     <div class="cases-list">
                         {% for case in basic_cases %}
-                        <div class="case" style="cursor: pointer;" onclick="window.location.href='/main?id={{ case.id }}'">
+                        <div class="case" style="cursor: pointer;" onclick="window.location.href='/main?case_id={{ case.id }}'">
                             <div class="case-img">
                                 <img class="cimg" src="{{ case.logo }}" alt="{{ case.name }}">
                             </div>
@@ -41,7 +41,7 @@
                     <h1>Кейсы "All in"</h1>
                     <div class="cases-list">
                         {% for case in allin_cases %}
-                        <div class="case" style="cursor: pointer;" onclick="window.location.href='/main?id={{ case.id }}'">
+                        <div class="case" style="cursor: pointer;" onclick="window.location.href='/main?case_id={{ case.id }}'">
                             <div class="case-img">
                                 <img class="cimg" src="{{ case.logo }}" alt="{{ case.name }}">
                             </div>
@@ -63,7 +63,7 @@
             {% if not basic_cases and not allin_cases %}
                 <p>Нет доступных кейсов</p>
             {% endif %}
-            
+
         </div>
     </div>
     
