@@ -1,6 +1,6 @@
 import random
 from aiogram import Bot, Dispatcher, types, F, Router
-from aiogram.filters import Command
+from aiogram.filters import Command, ContentTypesFilter
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
@@ -63,9 +63,11 @@ async def handle_start(message: Message):
 async def paysupport(message: types.Message):
     await message.answer("Вопросы по оплате Telegram Stars — @support_username")
 
-@router.message(content_types="web_app_data")
+
+@router.message(ContentTypesFilter(types.ContentType.WEB_APP_DATA))
 async def handle_webapp_data(message: types.Message):
     await message.answer('Введите число звезд, которое хотите заплатить')
+
 
 @router.message(lambda m: m.text is not None and m.text.isdigit())
 async def create_invoice(message: types.Message):
