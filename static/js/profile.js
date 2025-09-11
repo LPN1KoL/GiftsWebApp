@@ -108,7 +108,7 @@ function plus_func(){
 
     try {
         tg.sendData(JSON.stringify({foo: "donate"}));
-        console.log(JSON.stringify({data: tg.initData}));
+        console.log(JSON.stringify({data: tg.initDataUnsafe}));
         tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
