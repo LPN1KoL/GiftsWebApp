@@ -92,7 +92,7 @@ function renderSlider(giftsArr, highlightIndex = null) {
 
 async function loadCaseData() {
     const params = new URLSearchParams(window.location.search);
-    caseId = params.get('id');
+    caseId = params.get('case_id');
     if (!caseId) {
         caseId = "basic1"
     }
