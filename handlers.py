@@ -317,12 +317,14 @@ async def handle_gift_add(callback: CallbackQuery):
         "link": "https://example.com/gift",
         "img": "/media/gift.png",
         "chance": 0.1,
+        "fake_chance": 0.1,
         "price": 100
     }
     case["gifts"].append(new_gift)
     save_cases(cases)
     await callback.answer("✅ Подарок добавлен")
     await handle_case_gifts(callback)
+
 
 @router.callback_query(F.data.startswith("gift_edit_"))
 async def handle_gift_edit(callback: CallbackQuery, state: FSMContext):
@@ -343,14 +345,16 @@ async def handle_gift_edit(callback: CallbackQuery, state: FSMContext):
     await callback.message.edit_text(
         f"🎁 Редактирование подарка: {gift['name']}\n\n"
         f"Отправьте данные в формате:\n"
-        f"<code>Название\nШанс (0.0-1.0)\nЦена (число)</code>\n\n"
+        f"<code>Название\nШанс (0.0-1.0)\nФейковый шанс (0.0-1.0)\nЦена (число)</code>\n\n"
         f"Текущие данные:\n"
         f"Название: {gift['name']}\n"
         f"Шанс: {gift['chance']}\n"
+        f"Фейковый шанс: {gift.get('fake_chance', 'Не указан')}\n"
         f"Цена: {gift.get('price', 'Не указана')}\n"
         f"Ссылка: {gift.get('link', 'Не указана')}\n\n"
         f"После этого отправьте новую ссылку для скриншота (если нужно)"
     )
+
 
 @router.message(GiftEditState.waiting_for_gift_info)
 async def handle_gift_info_input(message: Message, state: FSMContext):
@@ -360,18 +364,27 @@ async def handle_gift_info_input(message: Message, state: FSMContext):
         gift_id = data['gift_id']
         lines = message.text.split('\n')
 
-        if len(lines) < 3:
-            await message.answer("❌ Неверный формат. Нужно: Название\nШанс\nЦена")
+        if len(lines) < 4:
+            await message.answer("❌ Неверный формат. Нужно: Название\nШанс\nФейковый шанс\nЦена")
             return
 
         name = lines[0].strip()
+
+        # основной шанс
         chance = float(lines[1].strip())
         if not 0 <= chance <= 1:
             await message.answer("❌ Шанс должен быть между 0 и 1")
             return
 
+        # фейковый шанс
+        fake_chance = float(lines[2].strip())
+        if not 0 <= fake_chance <= 1:
+            await message.answer("❌ Фейковый шанс должен быть между 0 и 1")
+            return
+
+        # цена
         try:
-            price = int(lines[2].strip())
+            price = int(lines[3].strip())
             if price < 0:
                 await message.answer("❌ Цена не может быть отрицательной")
                 return
@@ -382,6 +395,7 @@ async def handle_gift_info_input(message: Message, state: FSMContext):
         await state.update_data(
             gift_name=name,
             gift_chance=chance,
+            gift_fake_chance=fake_chance,
             gift_price=price
         )
         await state.set_state(GiftEditState.waiting_for_gift_url)
@@ -390,12 +404,13 @@ async def handle_gift_info_input(message: Message, state: FSMContext):
             "✅ Данные приняты!\n"
             f"Название: {name}\n"
             f"Шанс: {chance}\n"
+            f"Фейковый шанс: {fake_chance}\n"
             f"Цена: {price}\n\n"
             "Теперь отправьте новую ссылку для подарка "
             "(или отправьте 'пропустить', чтобы оставить текущую)"
         )
     except ValueError:
-        await message.answer("❌ Шанс и цена должны быть числами (например: 0.3 и 150)")
+        await message.answer("❌ Шанс, фейковый шанс и цена должны быть числами (например: 0.3, 0.7 и 150)")
     except Exception as e:
         await message.answer(f"❌ Ошибка: {e}")
         await state.clear()
