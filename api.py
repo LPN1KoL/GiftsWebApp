@@ -3,10 +3,12 @@ import aiohttp
 import base64
 from io import BytesIO
 from PIL import Image
+from dotenv import load_dotenv
 
-API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
-ADMIN_ID = 849307631
+load_dotenv()
 
+API_TOKEN = os.getenv("API_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 def send_win_notification_to_admin(user_id, gift, case_id):
     message_text = (
