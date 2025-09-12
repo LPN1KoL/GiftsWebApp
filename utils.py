@@ -7,52 +7,48 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from rembg import remove
 import time
+import threading
 
 
-async def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=527, crop_y=120, crop_size=255):
-    """
-    Асинхронная обёртка для синхронного кода скриншота и обработки.
-    """
-    def sync_task():
-        # Настройки Chrome
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("--window-size=640,360")
+
+def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=527, crop_y=120, crop_size=255):
+    # Настройки Chrome
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--window-size=640,360")
+    
+    try:
+        # Запускаем браузер
+        driver = webdriver.Chrome(options=chrome_options)
         
-        try:
-            # Запускаем браузер
-            driver = webdriver.Chrome(options=chrome_options)
-            
-            # Открываем страницу
-            driver.get(url)
-            
-            # Ждем загрузки страницы
-            time.sleep(3)
-            
-            # Делаем временный скриншот
-            temp_file = "temp_screenshot.png"
-            driver.save_screenshot(temp_file)
-            
-            # Закрываем браузер
+        # Открываем страницу
+        driver.get(url)
+        
+        # Ждем загрузки страницы
+        time.sleep(3)
+        
+        # Делаем временный скриншот
+        temp_file = "temp_screenshot.png"
+        driver.save_screenshot(temp_file)
+        
+        # Закрываем браузер
+        driver.quit()
+        
+        # Обрабатываем изображение
+        process_image(temp_file, output_path, crop_x, crop_y, crop_size)
+        
+        # Удаляем временный файл
+        os.remove(temp_file)
+        
+        print(f"Обработанный скриншот сохранен как: {output_path}")
+        
+    except Exception as e:
+        print(f"Ошибка: {e}")
+        if 'driver' in locals():
             driver.quit()
-            
-            # Обрабатываем изображение
-            process_image(temp_file, output_path, crop_x, crop_y, crop_size)
-            
-            # Удаляем временный файл
-            os.remove(temp_file)
-            
-            print(f"Обработанный скриншот сохранен как: {output_path}")
-            
-        except Exception as e:
-            print(f"Ошибка: {e}")
-            if 'driver' in locals():
-                driver.quit()
 
-    # Выполняем синхронную задачу в фоне
-    await asyncio.to_thread(sync_task)
 
 
 def process_image(input_path, output_path, crop_x, crop_y, crop_size):
@@ -96,7 +92,9 @@ if __name__ == "__main__":
     crop_y = 120
     crop_size = 255
     
-    await  take_screenshot_and_process(url, output_file, crop_x, crop_y, crop_size)
+    t = threading.Thread(target=sync_task, args=(url, output_file, crop_x, crop_y, crop_size))
+    t.start()
+    
     
 send_queue = asyncio.Queue()
 payments = {}

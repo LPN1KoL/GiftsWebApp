@@ -10,12 +10,14 @@ load_dotenv()
 API_TOKEN = os.getenv("API_TOKEN")
 
 async def main():
-    bot = Bot(token=API_TOKEN)
-    dp = Dispatcher()
-    dp.include_router(router)
-    await init_db()
-    asyncio.create_task(queue_watcher(bot))
-    await dp.start_polling(bot)
+    try:
+        bot = Bot(token=API_TOKEN)
+        dp = Dispatcher()
+        dp.include_router(router)
+        await init_db()
+        await dp.start_polling(bot)
+    except KeyboardInterrupt:
+        print("Bot stopped")
 
 if __name__ == "__main__":
     asyncio.run(main())

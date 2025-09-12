@@ -12,6 +12,7 @@
         "link": "https://example.com/gift1",
         "img": "/media/1.png",
         "chance": 0.3,
+        "fake_chance": 0.1,
         "price": 1
       },
       {
@@ -20,6 +21,7 @@
         "link": "https://example.com/gift2",
         "img": "/media/2.png",
         "chance": 0.7,
+        "fake_chance": 0.1,
         "price": 1
       }
     ]
@@ -37,6 +39,7 @@
         "link": "https://t.me/nft/PlushPepe-858",
         "img": "/media/gifts/gift-1-2467.png",
         "chance": 0.49,
+        "fake_chance": 0.1,
         "price": 1
       }
     ]
@@ -53,7 +56,35 @@
         "name": "123",
         "link": "https://t.me/nft/PlushPepe-858",
         "img": "/media/gifts/gift-1-9806.png",
+        "fake_chance": 0.1,
         "chance": 1.0,
+        "price": 100
+      }
+    ]
+  },
+  {
+    "id": "case-1",
+    "category": "basic",
+    "name": "Новый кейс 1",
+    "price": 100,
+    "logo": "/media/img.png",
+    "gifts": [
+      {
+        "id": "gift-1-6626",
+        "name": "А",
+        "link": "https://t.me/nft/LootBag-5380",
+        "img": "/media/gifts/gift-1-6626.png",
+        "chance": 0.5,
+        "fake_chance": 0.1,
+        "price": 100
+      },
+      {
+        "id": "gift-2-4907",
+        "name": "Б",
+        "link": "https://t.me/nft/SignetRing-14188",
+        "img": "/media/gifts/gift-2-4907.png",
+        "chance": 0.5,
+        "fake_chance": 0.1,
         "price": 100
       }
     ]

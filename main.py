@@ -4,16 +4,19 @@ from start import run_server
 from bot import main as bot_main
 
 def run_server_thread():
-    asyncio.run(run_server())
+    try:
+        asyncio.run(run_server())
+    except KeyboardInterrupt:
+        print("Server stopped")
 
 if __name__ == "__main__":
-    print("Стартую сервер и бота...")
+    print("Starting server and bot...")
 
-    # Запускаем сервер в отдельном потоке
+    # Start server in a separate thread
     server_thread = threading.Thread(target=run_server_thread, daemon=True)
     server_thread.start()
 
-    print("Сервер запущен, стартую бота...")
+    print("Server started, starting bot...")
 
-    # Запускаем бота в главном потоке
+    # Start bot in the main thread
     asyncio.run(bot_main())

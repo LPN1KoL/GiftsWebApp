@@ -6,10 +6,30 @@ const WIN_INDEX = 29; // индекс выигрышной карточки
 const CARD_WIDTH = 35; // vw
 const CARD_MARGIN = 4;
 const CARD_TOTAL = CARD_WIDTH + CARD_MARGIN; // 39vw
+const container = document.getElementById('data-block');
+const caseName = container.dataset.caseName;
+const casePrice = container.dataset.casePrice;
+const gifts = JSON.parse(container.dataset.gifts);
+const params = new URLSearchParams(window.location.search);
+
+caseId = params.get('case_id');
+if (!caseId) {
+    if (!localStorage.getItem('case_id')) {
+        caseId = container.dataset.caseId;
+        localStorage.setItem('case_id', caseId);
+    }
+} else {
+    localStorage.setItem('case_id', caseId);
+}
+
+if (localStorage.getItem('case_id')) {
+    caseId = localStorage.getItem('case_id');
+    document.getElementById("main_link").href = "/main?case_id=" + caseId;
+}
 
 // Получаем user_id из Telegram WebApp или используем тестовый
-let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || "849307631";
-localStorage.setItem("user_id", user_id);
+let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+
 
 
 async function sendApiRequest(endpoint, data) {
@@ -91,11 +111,8 @@ function renderSlider(giftsArr, highlightIndex = null) {
 }
 
 async function loadCaseData() {
-    const params = new URLSearchParams(window.location.search);
-    caseId = params.get('id');
-    if (!caseId) {
-        caseId = "basic1"
-    }
+    
+    
 
     try {
         const response = await fetch('/data/cases.json');
@@ -232,20 +249,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Обработчик для кнопки "Пополнить баланс"
-document.getElementById('main_button')?.addEventListener('click', async () => {
-    if (!user_id) {
-        alert("Ошибка: Не удалось определить Telegram ID");
-        return;
-    }
 
-    try {
-        const result = await sendApiRequest('/api/plus', { user_id });
-        alert("Запрос успешно отправлен!");
-        await updateBalance();
-    } catch (err) {
-        alert("Ошибка при отправке: " + err.message);
-    }
-});
+//document.addEventListener('DOMContentLoaded', loadCaseData);
 
-document.addEventListener('DOMContentLoaded', loadCaseData);
+

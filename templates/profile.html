@@ -154,19 +154,19 @@
     </div>
     <div class="slider">
         <div class="sections">
-            <a href="/templates/main.html">
+            <a id="main_link" href="/main">
                 <div class="section">
                     <i class="material-symbols-outlined">home</i>
                     <span class="span-sec">Главная</span>
                 </div>
             </a>
-            <a href="/templates/cases.html">
+            <a href="/cases">
                 <div class="section">
                     <i class="material-symbols-outlined">featured_seasonal_and_gifts</i>
                     <span class="span-sec">Кейсы</span>
                 </div>
             </a>
-            <a href="/templates/profile.html">
+            <a href="/profile">
                 <div class="section active">
                     <i class="material-symbols-outlined">account_circle</i>
                     <span class="span-sec">Профиль</span>
@@ -179,22 +179,6 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
 <script src="/static/js/profile.js"></script>
-<script>
-function plus_func() {
-    let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
-    if (!user_id) {
-        alert("Ошибка: Не удалось определить Telegram ID");
-        return;
-    }
-
-    try {
-        window.Telegram?.WebApp?.sendData(JSON.stringify({foo: "donate"}));
-        window.Telegram?.WebApp?.close();
-    } catch (err) {
-        alert("Ошибка при отправке: " + err.message);
-    }
-}
-</script>
 </body>
 </html>
 

@@ -20,6 +20,13 @@ html, body{
     margin: 0px;
 }
 
+*::-webkit-scrollbar {
+    display: none;
+}
+
+.data-block{
+    display: none;
+}
 
 .main{
     height: 100vh;

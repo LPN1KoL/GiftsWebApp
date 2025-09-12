@@ -65,10 +65,11 @@ async def handle_start(message: Message):
 async def paysupport(message: types.Message):
     await message.answer("Вопросы по оплате Telegram Stars — @support_username")
 
-#@router.callback_query(lambda c: c.web_app_data is not None)
-#async def handle_webapp_data(callback: CallbackQuery):
-#    await callback.answer('Запрос на платеж принят')
-#   await callback.bot.send_message(chat_id=callback.from_user.id, text='Введите число звезд, которое хотите заплатить')
+
+@router.message(F.web_app_data)
+async def handle_webapp_data(message: types.Message):
+    await message.answer('Введите число звезд, которое хотите заплатить')
+    
 
 @router.message(lambda m: m.text is not None and m.text.isdigit())
 async def create_invoice(message: types.Message):

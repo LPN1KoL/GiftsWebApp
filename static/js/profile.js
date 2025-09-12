@@ -1,5 +1,8 @@
+const tg = window.Telegram?.WebApp;
+tg.expand();
+
 document.addEventListener('DOMContentLoaded', () => {
-	const user_id = localStorage.getItem("user_id");
+	const user_id = tg.initDataUnsafe?.user?.id;
 
 
     const plusButton = document.getElementById('main_button');
@@ -37,13 +40,19 @@ async function updateProfile() {
         // Обновляем ник
         const usernameElement = document.querySelector('.profile h1');
         if (usernameElement) {
-            usernameElement.textContent = '@' + result.username;
+            usernameElement.textContent = '@' + tg.initDataUnsafe.user.username;
         }
 
         // Обновляем аватар
         const avatarElement = document.querySelector('.user-pic img');
         if (avatarElement) {
-            avatarElement.src = result.avatar.toLocaleString();
+            avatarElement.src = tg.initDataUnsafe.user.photo_url;
+        }
+
+        //Обновляем ссылку на кейс
+        if (localStorage.getItem('case_id')) {
+            caseId = localStorage.getItem('case_id');
+            document.getElementById('main_link').href = `/main?case_id=${caseId}`;
         }
 
         // Отображаем подарки
@@ -99,14 +108,20 @@ function cardClick(gift_id){
 }
 
 function plus_func(){
+    if (!tg) {
+        alert("WebApp не инициализирован");
+        return;
+    }
+
+    const user_id = tg.initDataUnsafe?.user?.id;
     if (!user_id) {
         alert("Ошибка: Не удалось определить Telegram ID");
         return;
     }
 
     try {
-        window.Telegram?.WebApp?.sendData(JSON.stringify({foo: "donate"}));
-        window.Telegram?.WebApp?.close();
+        tg.sendData(JSON.stringify({action: "donate",}));
+        tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }
