@@ -1,81 +1,81 @@
-import aiosqlite
+import asyncpg
+import asyncio
 import json
 import os
-import asyncio
 
-DB_PATH = "users.db"
+DB_CONFIG = {
+    "user": "root",
+    "password": "123",
+    "database": "sss",
+    "host": "localhost",
+    "port": 5432
+}
 
+# ===== СИНХРОННЫЕ ОБЁРТКИ =====
 def get_user_balance_sync(user_id):
     return asyncio.run(get_user_balance(user_id))
 
 def get_user_profile_data_sync(user_id):
     return asyncio.run(get_user_profile_data(user_id))
 
+# ===== ИНИЦИАЛИЗАЦИЯ БД =====
 async def init_db():
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                user_id INTEGER PRIMARY KEY,
-                username TEXT,
-                balance INTEGER DEFAULT 0,
-                gifts TEXT DEFAULT '[]',
-                avatar TEXT
-            )
-        """)
-        await db.commit()
+    conn = await asyncpg.connect(**DB_CONFIG)
+    await conn.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            user_id BIGINT PRIMARY KEY,
+            username TEXT,
+            balance INTEGER DEFAULT 0,
+            gifts JSONB DEFAULT '[]'::jsonb
+        )
+    """)
+    await conn.close()
 
+# ===== CRUD =====
 async def get_user(user_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT balance, gifts FROM users WHERE user_id = ?", (user_id,)) as cursor:
-            return await cursor.fetchone()
+    conn = await asyncpg.connect(**DB_CONFIG)
+    row = await conn.fetchrow("SELECT balance, gifts FROM users WHERE user_id = $1", user_id)
+    await conn.close()
+    return row
 
 async def update_user_balance_and_gifts(user_id, new_balance, new_gifts):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("UPDATE users SET balance = ?, gifts = ? WHERE user_id = ?",
-                         (new_balance, json.dumps(new_gifts), user_id))
-        await db.commit()
+    conn = await asyncpg.connect(**DB_CONFIG)
+    await conn.execute(
+        "UPDATE users SET balance = $1, gifts = $2 WHERE user_id = $3",
+        new_balance, json.dumps(new_gifts), user_id
+    )
+    await conn.close()
 
 async def set_user_balance(user_id, amount):
-    async with aiosqlite.connect(DB_PATH) as db:
-        await db.execute("UPDATE users SET balance = balance + ? WHERE user_id = ?", (amount, user_id))
-        await db.commit()
+    conn = await asyncpg.connect(**DB_CONFIG)
+    await conn.execute("UPDATE users SET balance = balance + $1 WHERE user_id = $2", amount, user_id)
+    await conn.close()
 
 async def get_user_balance(user_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute("SELECT balance FROM users WHERE user_id = ?", (user_id,)) as cursor:
-            row = await cursor.fetchone()
-            return row[0] if row else None
+    conn = await asyncpg.connect(**DB_CONFIG)
+    row = await conn.fetchrow("SELECT balance FROM users WHERE user_id = $1", user_id)
+    await conn.close()
+    return row["balance"] if row else None
 
 async def get_user_profile_data(user_id):
-    async with aiosqlite.connect(DB_PATH) as db:
-        async with db.execute(
-            "SELECT username, balance, gifts FROM users WHERE user_id = ?",
-            (user_id,)
-        ) as cursor:
-            row = await cursor.fetchone()
-            if not row:
-                return {"error": "Пользователь не найден"}
-            username, balance, gifts_json = row
-
+    conn = await asyncpg.connect(**DB_CONFIG)
+    row = await conn.fetchrow(
+        "SELECT username, balance, gifts FROM users WHERE user_id = $1", user_id
+    )
+    await conn.close()
+    if not row:
+        return {"error": "Пользователь не найден"}
     return {
-        "username": username,
-        "balance": balance,
-        "gifts_json": gifts_json
+        "username": row["username"],
+        "balance": row["balance"],
+        "gifts_json": row["gifts"]
     }
 
-
 async def create_or_update_user(user_id, username):
-    async with aiosqlite.connect(DB_PATH) as db:
-        cursor = await db.execute("PRAGMA table_info(users)")
-        columns = await cursor.fetchall()
-        column_names = [column[1] for column in columns]
-        if 'avatar' not in column_names:
-            await db.execute("ALTER TABLE users ADD COLUMN avatar TEXT")
-            await db.commit()
-        cursor = await db.execute("SELECT avatar FROM users WHERE user_id = ?", (user_id,))
-        user_exists = await cursor.fetchone()
-        if user_exists:
-            await db.execute("UPDATE users SET username = ? WHERE user_id = ?", (username, user_id))
-        else:
-            await db.execute("INSERT INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
-        await db.commit()
+    conn = await asyncpg.connect(**DB_CONFIG)
+    user_exists = await conn.fetchrow("SELECT user_id FROM users WHERE user_id = $1", user_id)
+    if user_exists:
+        await conn.execute("UPDATE users SET username = $1 WHERE user_id = $2", username, user_id)
+    else:
+        await conn.execute("INSERT INTO users (user_id, username) VALUES ($1, $2)", user_id, username)
+    await conn.close()

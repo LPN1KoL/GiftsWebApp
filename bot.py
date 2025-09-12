@@ -3,9 +3,11 @@ from aiogram import Bot, Dispatcher
 from handlers import router
 from db import init_db
 from utils import queue_watcher
+from dotenv import load_dotenv
 
-API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
+load_dotenv()
 
+API_TOKEN = os.getenv("API_TOKEN")
 
 async def main():
     bot = Bot(token=API_TOKEN)

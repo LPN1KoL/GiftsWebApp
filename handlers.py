@@ -10,11 +10,13 @@ from cases import *
 from api import *
 from utils import send_queue, payments
 from utils import take_screenshot_and_process
+from dotenv import load_dotenv
 
+load_dotenv()
 
+API_TOKEN = os.getenv("API_TOKEN")
+ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
-API_TOKEN = "8008525871:AAFpPTPQbsF661zdGXSNRsriquhiqn-VpKQ"
-ADMIN_ID = 849307631
 router = Router()
 
 class CaseEditState(StatesGroup):
