@@ -201,7 +201,7 @@ async def verify_telegram_webapp_data(init_data: str):
         return user_data
         
     except Exception as e:
-        raise HTTPException(status_code=407, detail=f"Verification failed: {str(e)}")
+        raise HTTPException(status_code=200, detail=f"Verification failed: {str(e)}")
 
 
 # --- Роутинг ---
