@@ -269,7 +269,7 @@ async def serve_static_files(filename: str):
 @app.post("/api/open_case")
 async def handle_open_case(request: Request):
     data = await request.json()
-    user_data = verify_telegram_webapp_data(data.get("init_data"))
+    user_data = await verify_telegram_webapp_data(data.get("init_data"))
     user_id = user_data.get("id")
     case_id = data.get("case_id")
     if not user_id:
