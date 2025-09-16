@@ -148,7 +148,6 @@ async def verify_telegram_webapp_data(init_data: str):
     """
     Полная проверка Telegram WebApp init data
     """
-    print(f"init_data: {init_data}")
     if not init_data:
         raise HTTPException(status_code=401, detail="Init data required")
     
@@ -272,8 +271,6 @@ async def handle_open_case(request: Request):
     data = await request.json()
     user_data = await verify_telegram_webapp_data(data.get("init_data"))
     user_id = user_data.get("id")
-    print(f"user_data: {user_data}")
-    print(f"user_id: {user_id}")
     case_id = data.get("case_id")
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing user_data")
