@@ -149,7 +149,7 @@ async def verify_telegram_webapp_data(init_data: str):
     Полная проверка Telegram WebApp init data
     """
     if not init_data:
-        raise HTTPException(status_code=401, detail="Init data required")
+        raise HTTPException(status_code=402, detail="Init data required")
     
     try:
         # Парсим данные
@@ -158,7 +158,7 @@ async def verify_telegram_webapp_data(init_data: str):
         # Извлекаем hash
         hash_value = parsed_data.get("hash", [None])[0]
         if not hash_value:
-            raise HTTPException(status_code=401, detail="Hash not found")
+            raise HTTPException(status_code=405, detail="Hash not found")
         
         # Удаляем hash из данных для проверки
         parsed_data.pop("hash", None)
@@ -192,7 +192,7 @@ async def verify_telegram_webapp_data(init_data: str):
         # Извлекаем user данные
         user_str = parsed_data.get("user", [None])[0]
         if not user_str:
-            raise HTTPException(status_code=401, detail="User data not found")
+            raise HTTPException(status_code=406, detail="User data not found")
         
         # Парсим user данные
         import json
@@ -201,7 +201,7 @@ async def verify_telegram_webapp_data(init_data: str):
         return user_data
         
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Verification failed: {str(e)}")
+        raise HTTPException(status_code=407, detail=f"Verification failed: {str(e)}")
 
 
 # --- Роутинг ---
