@@ -285,7 +285,7 @@ async def handle_open_case(request: Request):
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
 
-    return result
+    return JSONResponse(status_code=200, content=result)
 
 
 @app.post("/api/get_profile")

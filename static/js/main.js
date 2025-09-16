@@ -255,7 +255,7 @@ async function open_case() {
             renderSlider();
         }
         else {
-            alert_error(result.response);
+            alert(result.response);
         }
         
     } catch (error) {
