@@ -175,7 +175,7 @@ async def verify_telegram_webapp_data(init_data: str):
         # Создаем секретный ключ
         secret_key = hmac.new(
             key=b"WebAppData",
-            msg=os.getenv("BOT_TOKEN").encode(),
+            msg=os.getenv("API_TOKEN").encode(),
             digestmod=hashlib.sha256
         ).digest()
         
