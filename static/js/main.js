@@ -226,7 +226,7 @@ async function open_case() {
         });
         console.log(result);
 
-        if (result.status_code == 200) {
+        if (result) {
         
             const wonGift = result.gift;
 
