@@ -209,11 +209,6 @@ async function loadCaseData() {
     }
 }
 
-async function alert_error(error) {
-    console.error('Ошибка:', error);
-    alert(error.text);
-}
-
 async function open_case() {
 
     const btn = document.getElementById('open_case');
