@@ -32,22 +32,8 @@ class GiftEditState(StatesGroup):
 @router.message(F.text == "/start")
 async def handle_start(message: Message):
     user_id = message.from_user.id
-    username = message.from_user.username or ""
     
-    async with aiosqlite.connect("users.db") as db:
-        
-        # Проверяем, существует ли пользователь
-        cursor = await db.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
-        user_exists = await cursor.fetchone()
-        
-        if user_exists:
-            # Пользователь уже существует, обновляем username если нужно
-            await db.execute("UPDATE users SET username = ? WHERE user_id = ?", (username, user_id))
-        else:
-            # Новый пользователь
-            await db.execute("INSERT INTO users (user_id, username) VALUES (?, ?)", (user_id, username))
-        
-        await db.commit()
+    await create_user(user_id)
     
     keyboard = types.InlineKeyboardMarkup(
         inline_keyboard=[
