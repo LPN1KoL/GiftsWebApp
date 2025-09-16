@@ -14,7 +14,13 @@ from cases import try_open_case
 from bot import main as bot_main
 from api import *
 import json
+from urllib.parse import parse_qs, urlencode
+import hmac
+import hashlib
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI(title="Gifts App API")
 templates = Jinja2Templates(directory="templates")
 
@@ -29,8 +35,6 @@ app.add_middleware(
 
 # Монтирование статических файлов
 app.mount("/static", StaticFiles(directory="static"), name="static")
-app.mount("/templates", StaticFiles(directory="templates"), name="templates")
-app.mount("/data", StaticFiles(directory="data"), name="data")
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
@@ -140,6 +144,66 @@ async def get_case_complete_data(case_id, random_length=32):
         return None
 
 
+async def verify_telegram_webapp_data(init_data: str):
+    """
+    Полная проверка Telegram WebApp init data
+    """
+    if not init_data:
+        raise HTTPException(status_code=401, detail="Init data required")
+    
+    try:
+        # Парсим данные
+        parsed_data = parse_qs(init_data)
+        
+        # Извлекаем hash
+        hash_value = parsed_data.get("hash", [None])[0]
+        if not hash_value:
+            raise HTTPException(status_code=401, detail="Hash not found")
+        
+        # Удаляем hash из данных для проверки
+        parsed_data.pop("hash", None)
+        
+        # Сортируем параметры и создаем data_check_string
+        data_check_parts = []
+        for key in sorted(parsed_data.keys()):
+            for value in parsed_data[key]:
+                data_check_parts.append(f"{key}={value}")
+        
+        data_check_string = "\n".join(data_check_parts)
+        
+        # Создаем секретный ключ
+        secret_key = hmac.new(
+            key=b"WebAppData",
+            msg=os.getenv("BOT_TOKEN").encode(),
+            digestmod=hashlib.sha256
+        ).digest()
+        
+        # Вычисляем ожидаемый hash
+        expected_hash = hmac.new(
+            key=secret_key,
+            msg=data_check_string.encode(),
+            digestmod=hashlib.sha256
+        ).hexdigest()
+        
+        # Сравниваем hash
+        if not hmac.compare_digest(hash_value, expected_hash):
+            raise HTTPException(status_code=401, detail="Invalid hash")
+        
+        # Извлекаем user данные
+        user_str = parsed_data.get("user", [None])[0]
+        if not user_str:
+            raise HTTPException(status_code=401, detail="User data not found")
+        
+        # Парсим user данные
+        import json
+        user_data = json.loads(user_str)
+        
+        return user_data
+        
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=f"Verification failed: {str(e)}")
+
+
 # --- Роутинг ---
 @app.get("/", response_class=HTMLResponse)
 @app.get("/main", response_class=HTMLResponse)
@@ -194,12 +258,6 @@ async def get_media_file(filename):
 
 @app.get("/{filename}")
 async def serve_static_files(filename: str):
-    # Проверяем существование файла в templates
-    templates_path = os.path.join("templates", filename)
-    if os.path.isfile(templates_path):
-        return FileResponse(templates_path)
-
-    # Проверяем существование файла в static
     static_path = os.path.join("static", filename)
     if os.path.isfile(static_path):
         return FileResponse(static_path)
@@ -208,40 +266,20 @@ async def serve_static_files(filename: str):
     raise HTTPException(status_code=404, detail="File not found")
 
 
-@app.get("/data/cases.json")
-async def load_cases():
-    try:
-        return FileResponse('/data/cases.json')
-    except:
-        # Если файл не найден
-        raise HTTPException(status_code=404, detail="File not found")
-
-
-@app.post("/api/get_balance")
-async def handle_get_balance(request: Request):
-    data = await request.json()
-    user_id = data.get("user_id")
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Missing 'user_id'")
-
-    balance = await get_user_balance(user_id)
-    return {"balance": balance}
-
-
 @app.post("/api/open_case")
 async def handle_open_case(request: Request):
     data = await request.json()
-    user_id = data.get("user_id")
+    user_data = verify_telegram_webapp_data(data.get("init_data"))
+    user_id = user_data.get("id")
     case_id = data.get("case_id")
     if not user_id:
-        raise HTTPException(status_code=400, detail="Missing 'user_id'")
+        raise HTTPException(status_code=400, detail="Missing user_data")
 
     result = await try_open_case(
         user_id,
         case_id,
         get_user,
-        update_user_balance_and_gifts,
-        send_win_notification_to_admin
+        update_user_balance_and_gifts
     )
 
     if "error" in result:

@@ -4,6 +4,7 @@ from handlers import router
 from db import init_db
 from utils import queue_watcher
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 

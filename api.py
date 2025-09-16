@@ -4,6 +4,7 @@ import base64
 from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 

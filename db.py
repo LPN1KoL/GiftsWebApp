@@ -1,7 +1,6 @@
 import asyncpg
 import asyncio
 import json
-import os
 
 DB_CONFIG = {
     "user": "root",

@@ -64,7 +64,7 @@ def get_gift_by_id(case, gift_id):
     return next((g for g in case["gifts"] if g["id"] == gift_id), None)
 
 
-async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts, send_admin_notification):
+async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts):
     cases = load_cases()
     case = next((c for c in cases if c["id"] == case_id), None)
     if not case:
@@ -80,7 +80,7 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
     cumulative = 0
     selected_gift = None
     for gift in case["gifts"]:
-        cumulative += gift["chance"]
+        cumulative += gift["fake_chance"]
         if rnd <= cumulative:
             selected_gift = gift
             break
@@ -90,12 +90,11 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
     gifts_list.append(selected_gift["id"])
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
-    await asyncio.to_thread(send_admin_notification, user_id, selected_gift, case_id)
     return {
         "gift": {
-            "id": gift["id"],
-            "name": gift["name"],
-            "img": gift["img"],
-            "price": gift.get("price", 0)
+            "id": selected_gift["id"],
+            "name": selected_gift["name"],
+            "image": selected_gift["img"],
+            "price": selected_gift.get("price", 0)
         }
     }
