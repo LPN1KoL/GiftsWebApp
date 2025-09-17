@@ -97,7 +97,7 @@ function selectGiftByChance(giftsList) {
 function renderSlider(wonGift = null) {
     const slider = document.getElementById('slide');
     slider.innerHTML = '';
-    const gifts = document.getElementById('data-block').dataset.randomGifts.random_gifts;
+    const gifts = JSON.parse(document.getElementById('data-block').dataset.randomGifts).random_gifts;
     console.log(gifts)
     console.log(document.getElementById('data-block').dataset)
     console.log(document.getElementById('data-block').dataset.randomGifts)
