@@ -99,6 +99,8 @@ function renderSlider(wonGift = null) {
     slider.innerHTML = '';
     const gifts = document.getElementById('data-block').dataset.randomGifts.random_gifts;
     console.log(gifts)
+    console.log(document.getElementById('data-block').dataset)
+    console.log(document.getElementById('data-block').dataset.randomGifts)
     for(let i = 0; i < gifts.length; i++) {
 
         // Выбираем подарок по шансам
