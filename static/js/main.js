@@ -193,12 +193,14 @@ function sleep(ms) {
 async function sell_gift(gift_id){
 
     try {
-        const result = await sendApiRequest('/api/sell_gift', { initData, gift_id });
+        const tg = window.Telegram?.WebApp;
+        const result = await sendApiRequest('/api/sell_gift', { initData: tg.initData, gift_id: gift_id });
         if (result && result.success) {
             document.querySelector('.modal').classList.remove('active');
             return;
         } else {
             alert('Ошибка при продаже подарка');
+            console.error("Ошибка при продаже подарка:", result);
             return;
         }
 
