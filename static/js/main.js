@@ -175,13 +175,12 @@ function showWinModal(gift) {
     const imgEl = modal.querySelector('.img img');
     const countEl = modal.querySelector('.cnt');
     const caseNameEl = document.getElementById('case_name');
-    const sell_btn = document.getElementById('sell_btn');
 
     if (gift) {
         imgEl.src = gift.image;
         countEl.textContent = gift.price;
         caseNameEl.textContent = gift.name;
-        sell_btn.setAttribute("onclick", `sell_gift(${gift.id})`);
+        document.getElementById('sell_btn').onclick = () => sell_gift(gift.id);
     }
 
     modal.classList.add('active');
