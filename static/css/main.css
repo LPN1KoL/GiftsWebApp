@@ -128,7 +128,7 @@ html, body{
     object-fit: contain;
 }
 
-#get_gift{
+#sell_btn{
     width: calc(100% - 4vw);
     height: 6vh;
     margin: 1vh 2vw;

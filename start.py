@@ -211,7 +211,6 @@ async def verify_telegram_webapp_data(init_data: str):
 async def serve_main(request: Request):
     case_id = request.query_params.get("case_id")
     if case_id:
-        print(f"Запрошен case_id: {case_id}")
         data = await get_case_complete_data(case_id)
         if data:
             return templates.TemplateResponse("main.html", {"request": request, "case_id": case_id, "gifts": data["gifts"], "random_gifts": {"random_gifts": data["random_gifts"]}, "case_data": data["case_data"]})
@@ -284,7 +283,6 @@ async def handle_open_case(request: Request):
     )
 
     if "error" in result:
-        print(f"Ошибка открытия кейса: {result['error']}")
         raise HTTPException(status_code=400, detail=result["error"])
 
     return JSONResponse(status_code=200, content=result)
@@ -327,7 +325,6 @@ async def handle_get_profile(request: Request):
             "gifts": profile_data.get("gifts", [])
         }
     except Exception as e:
-        print(f"Ошибка получения профиля: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
