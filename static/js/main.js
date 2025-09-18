@@ -193,21 +193,27 @@ function sleep(ms) {
 async function sell_gift(gift_id){
 
     try {
+        const btn = document.getElementById('sell_btn');
+        btn.setAttribute('disabled', '');
+        btn.innerText = 'Подождите...';
+        btn.style.backgroundColor = '#255ea0';
         const tg = window.Telegram?.WebApp;
         const result = await sendApiRequest('/api/sell_gift', { initData: tg.initData, gift_id: gift_id });
         if (result && result.success) {
-            document.querySelector('.modal').classList.remove('active');
             return;
         } else {
             alert('Ошибка при продаже подарка');
             console.error("Ошибка при продаже подарка:", result);
-            return;
         }
 
     } catch (err) {
         console.error("Ошибка при продаже подарка:", err);
         alert('Ошибка при продаже подарка');
-        return;
+    } finally {
+        document.querySelector('.modal').classList.remove('active');
+        btn.removeAttribute('disabled');
+        btn.innerText = 'Продать';
+        btn.style.backgroundColor = '#3281dc';
     }
-
+    
 }

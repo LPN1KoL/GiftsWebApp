@@ -24,6 +24,69 @@ html, body{
     margin: 0px;
 }
 
+/* ------- Стили для страницы загрузки ------*/
+
+@keyframes ldio-yzaezf3dcmj-o {
+    0%    { opacity: 1; transform: translate(0 0) }
+    49.99% { opacity: 1; transform: translate(80px,0) }
+    50%    { opacity: 0; transform: translate(80px,0) }
+    100%    { opacity: 0; transform: translate(0,0) }
+}
+@keyframes ldio-yzaezf3dcmj {
+    0% { transform: translate(0,0) }
+    50% { transform: translate(80px,0) }
+    100% { transform: translate(0,0) }
+}
+.ldio-yzaezf3dcmj div {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    top: 60px;
+    left: 20px;
+}
+.ldio-yzaezf3dcmj div:nth-child(1) {
+    background: #e90c59;
+    animation: ldio-yzaezf3dcmj 2.127659574468085s linear infinite;
+    animation-delay: -1.0638297872340425s;
+}
+.ldio-yzaezf3dcmj div:nth-child(2) {
+    background: #46dff0;
+    animation: ldio-yzaezf3dcmj 2.127659574468085s linear infinite;
+    animation-delay: 0s;
+}
+.ldio-yzaezf3dcmj div:nth-child(3) {
+    background: #e90c59;
+    animation: ldio-yzaezf3dcmj-o 2.127659574468085s linear infinite;
+    animation-delay: -1.0638297872340425s;
+}
+.loadingio-spinner-dual-ball-2by998twmg8 {
+    width: 200px;
+    height: 200px;
+    display: inline-block;
+    overflow: hidden;
+    background: inherit;
+}
+.ldio-yzaezf3dcmj {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform: translateZ(0) scale(1);
+    backface-visibility: hidden;
+    transform-origin: 0 0; /* see note above */
+}
+.ldio-yzaezf3dcmj div { box-sizing: content-box; }
+
+.loading-wrapper{
+    height: 100vh;
+    width: 100vw;
+    background-color: #202b39;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ------- Стили для страницы профиля ------*/
 .main{
     height: 100vh;
     width: 100vw;

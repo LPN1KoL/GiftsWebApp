@@ -114,8 +114,6 @@ async def try_sell_gift(user_id, gift_id, get_user, update_user_balance_and_gift
         return {"error": "Информация о подарке не найдена"}
     sell_price = gift.get("price", 0)
     new_balance = balance + sell_price
-    print(len(gifts_list))
     gifts_list.remove(gift_id)
-    print(len(gifts_list))
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
     return {"success": True}
