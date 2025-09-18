@@ -8,6 +8,7 @@ import uvicorn
 import ssl
 import asyncio
 import os
+import sys
 from db import get_user_balance, get_user_profile_data
 from db import get_user, update_user_balance_and_gifts
 from cases import try_open_case
@@ -308,8 +309,8 @@ async def handle_get_profile(request: Request):
 
 # --- Запуск ---
 async def run_server():
-    ssl_cert = f"/etc/letsencrypt/live/n8n.goyour.quest/fullchain.pem"
-    ssl_key = f"/etc/letsencrypt/live/n8n.goyour.quest/privkey.pem"
+    ssl_cert = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/fullchain.pem"
+    ssl_key = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/privkey.pem"
 
     ssl_context = None
     port = 8080
@@ -332,7 +333,10 @@ async def run_server():
     )
 
     server = uvicorn.Server(config)
-    await server.serve()
+    try:
+        await server.serve()
+    except KeyboardInterrupt:
+        sys.exit(0)
 
 async def main():
     # Запускаем сервер и бота параллельно

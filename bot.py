@@ -5,6 +5,7 @@ from db import init_db
 from utils import queue_watcher
 from dotenv import load_dotenv
 import os
+import sys
 
 load_dotenv()
 
@@ -19,6 +20,8 @@ async def main():
         await dp.start_polling(bot)
     except KeyboardInterrupt:
         print("Bot stopped")
+        sys.exit(0)
+        
 
 if __name__ == "__main__":
     asyncio.run(main())
