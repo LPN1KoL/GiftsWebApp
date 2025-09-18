@@ -234,13 +234,13 @@ async function open_case() {
 
             const slider = document.getElementById('slide');
             slider.style.transition = 'transform 3s cubic-bezier(0.33,1,0.68,1)';
-            const randomOffset = 0;
+            let randomOffset = 0;
             if (Math.random() < 0.5) {
                 randomOffset = Math.random() * (CARD_WIDTH / 2);
             } else {
-                randomOffset = Math.random() * -1 * (CARD_WIDTH / 2);
+                randomOffset = Math.random() * (-1) * (CARD_WIDTH / 2);
             }
-            const targetX = -((WIN_INDEX - 1) * CARD_TOTAL + randomOffset);
+            const targetX = -(((WIN_INDEX - 1) * CARD_TOTAL) + randomOffset);
             slider.style.transform = `translateX(${targetX}vw)`;
 
             await sleep(3200);
@@ -254,10 +254,12 @@ async function open_case() {
             renderSlider();
         }
         else {
+            console.error(result)
             alert("Ошибка при открытии кейса");
         }
         
     } catch (error) {
+        console.error(error)
         alert('Ошибка при открытии кейса');
     }
 
