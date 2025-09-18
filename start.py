@@ -308,8 +308,8 @@ async def handle_get_profile(request: Request):
 
 # --- Запуск ---
 async def run_server():
-    ssl_cert = "/etc/letsencrypt/live/giftsapp.ddns.net/fullchain.pem"
-    ssl_key = "/etc/letsencrypt/live/giftsapp.ddns.net/privkey.pem"
+    ssl_cert = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/fullchain.pem"
+    ssl_key = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/privkey.pem"
 
     ssl_context = None
     port = 8080
