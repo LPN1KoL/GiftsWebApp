@@ -286,6 +286,7 @@ async def handle_open_case(request: Request):
     )
 
     if "error" in result:
+        print(f"Ошибка открытия кейса: {result['error']}")
         raise HTTPException(status_code=400, detail=result["error"])
 
     return JSONResponse(status_code=200, content=result)

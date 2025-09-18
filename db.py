@@ -66,22 +66,14 @@ async def get_user_balance(user_id):
 async def get_user_profile_data(user_id):
     conn = await asyncpg.connect(**DB_CONFIG)
     row = await conn.fetchrow(
-        "SELECT username, balance, gifts FROM users WHERE user_id = $1", user_id
+        "SELECT balance, gifts FROM users WHERE user_id = $1", user_id
     )
     await conn.close()
     if not row:
         return {"error": "Пользователь не найден"}
     return {
-        "username": row["username"],
         "balance": row["balance"],
         "gifts_json": row["gifts"]
     }
 
-async def create_or_update_user(user_id, username):
-    conn = await asyncpg.connect(**DB_CONFIG)
-    user_exists = await conn.fetchrow("SELECT user_id FROM users WHERE user_id = $1", user_id)
-    if user_exists:
-        await conn.execute("UPDATE users SET username = $1 WHERE user_id = $2", username, user_id)
-    else:
-        await conn.execute("INSERT INTO users (user_id, username) VALUES ($1, $2)", user_id, username)
-    await conn.close()
+
