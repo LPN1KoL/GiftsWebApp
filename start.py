@@ -11,7 +11,7 @@ import os
 import sys
 from db import get_user_balance, get_user_profile_data
 from db import get_user, update_user_balance_and_gifts
-from cases import try_open_case
+from cases import try_open_case, try_sell_gift
 from bot import main as bot_main
 from api import *
 import json
@@ -292,6 +292,28 @@ async def handle_open_case(request: Request):
     return JSONResponse(status_code=200, content=result)
 
 
+@app.post("/api/sell_gift")
+async def handle_sell_gift(request: Request):
+    data = await request.json()
+    init_data = data.get("initData")
+    gift_id = data.get("gift_id")
+    if not init_data or not gift_id:
+        raise HTTPException(status_code=400, detail="Missing 'initData' or 'gift_id'")
+
+    user_data = await verify_telegram_webapp_data(init_data)
+    user_id = user_data.get("id")
+    if not user_id:
+        raise HTTPException(status_code=404, detail="Missing user_data")
+
+    await try_sell_gift(user_id, gift_id, get_user, update_user_balance_and_gifts)
+
+    try:
+        return JSONResponse(status_code=200, content={"success": True})
+    except Exception as e:
+        print(f"Ошибка при продаже подарка: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 @app.post("/api/get_profile")
 async def handle_get_profile(request: Request):
     data = await request.json()
@@ -301,6 +323,7 @@ async def handle_get_profile(request: Request):
 
     try:
         profile_data = await get_user_profile_data(user_id)
+        print(profile_data)
         return {
             "balance": profile_data.get("balance", 0),
             "gifts": profile_data.get("gifts", [])

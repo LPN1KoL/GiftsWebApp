@@ -98,3 +98,22 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
             "price": selected_gift.get("price", 0)
         }
     }
+
+async def try_sell_gift(user_id, gift_id, get_user, update_user_balance_and_gifts):
+    row = await get_user(user_id)
+    if not row:
+        return {"error": "Пользователь не найден"}
+    balance, gifts_raw = row
+    gifts_list = json.loads(gifts_raw) if gifts_raw else []
+    if gift_id not in gifts_list:
+        return {"error": "Подарок не найден в инвентаре"}
+    cases = load_cases()
+    gift_info = {gift["id"]: gift for case in cases for gift in case["gifts"]}
+    gift = gift_info.get(gift_id)
+    if not gift:
+        return {"error": "Информация о подарке не найдена"}
+    sell_price = gift.get("price", 0)
+    new_balance = balance + sell_price
+    gifts_list.remove(gift_id)
+    await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
+    return {"success": True}

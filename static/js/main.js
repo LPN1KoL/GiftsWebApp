@@ -220,7 +220,6 @@ async function open_case() {
 
     try {
         tg = window.Telegram?.WebApp;
-        // Отправляем запрос на открытие кейса
         const result = await sendApiRequest('/api/open_case', {
             init_data: tg.initData,
             case_id: document.getElementById('data-block').dataset.caseId
@@ -234,28 +233,32 @@ async function open_case() {
             renderSlider(wonGift);
 
             const slider = document.getElementById('slide');
-            // Анимация: transition к выигрышу
             slider.style.transition = 'transform 3s cubic-bezier(0.33,1,0.68,1)';
-            // Добавляем случайный разброс внутри одной карточки
-            const randomOffset = Math.random() * CARD_WIDTH - CARD_WIDTH / 2; // от -CARD_WIDTH/2 до +CARD_WIDTH/2
+            const randomOffset = 0;
+            if (Math.random() < 0.5) {
+                randomOffset = Math.random() * (CARD_WIDTH / 2);
+            } else {
+                randomOffset = Math.random() * -1 * (CARD_WIDTH / 2);
+            }
             const targetX = -((WIN_INDEX - 1) * CARD_TOTAL + randomOffset);
             slider.style.transform = `translateX(${targetX}vw)`;
 
-            await sleep(3100);
+            await sleep(3200);
 
             if (wonGift) {
                 showWinModal(wonGift);
             } else {
                 alert('Подарок не найден');
             }
+            await sleep(100);
             renderSlider();
         }
         else {
-            alert(result.response);
+            alert("Ошибка при открытии кейса");
         }
         
     } catch (error) {
-        alert('Ошибка при открытии кейса: ' + error.message);
+        alert('Ошибка при открытии кейса');
     }
 
     btn.removeAttribute('disabled');
@@ -268,11 +271,13 @@ function showWinModal(gift) {
     const imgEl = modal.querySelector('.img img');
     const countEl = modal.querySelector('.cnt');
     const caseNameEl = document.getElementById('case_name');
+    const sell_btn = document.getElementById('sell_btn');
 
     if (gift) {
-        imgEl.src = gift.img;               // картинка подарка
-        countEl.textContent = gift.price || ""; // цена/очки (если есть)
-        caseNameEl.textContent = gift.name || "Ваш подарок";
+        imgEl.src = gift.image;
+        countEl.textContent = gift.price;
+        caseNameEl.textContent = gift.name;
+        sell_btn.setAttribute("onclick", `sell_gift(${gift.id})`);
     }
 
     modal.classList.add('active');
@@ -282,7 +287,22 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+async function sell_gift(gift_id){
 
-//document.addEventListener('DOMContentLoaded', loadCaseData);
+    try {
+        const result = await sendApiRequest('/api/sell_gift', { initData, gift_id });
+        if (result && result.success) {
+            document.querySelector('.modal').classList.remove('active');
+            return;
+        } else {
+            alert('Ошибка при продаже подарка');
+            return;
+        }
 
+    } catch (err) {
+        console.error("Ошибка при продаже подарка:", err);
+        alert('Ошибка при продаже подарка');
+        return;
+    }
 
+}
