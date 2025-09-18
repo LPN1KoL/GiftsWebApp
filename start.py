@@ -273,7 +273,7 @@ async def handle_open_case(request: Request):
     user_id = user_data.get("id")
     case_id = data.get("case_id")
     if not user_id:
-        raise HTTPException(status_code=400, detail="Missing user_data")
+        raise HTTPException(status_code=404, detail="Missing user_data")
 
     result = await try_open_case(
         user_id,
@@ -308,8 +308,8 @@ async def handle_get_profile(request: Request):
 
 # --- Запуск ---
 async def run_server():
-    ssl_cert = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/fullchain.pem"
-    ssl_key = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/privkey.pem"
+    ssl_cert = f"/etc/letsencrypt/live/n8n.goyour.quest/fullchain.pem"
+    ssl_key = f"/etc/letsencrypt/live/n8n.goyour.quest/privkey.pem"
 
     ssl_context = None
     port = 8080

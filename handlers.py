@@ -39,7 +39,7 @@ async def handle_start(message: Message):
         inline_keyboard=[
             [types.InlineKeyboardButton(
                 text="Open Web App",
-                web_app=types.WebAppInfo(url=f'https://{os.getenv("DOMAIN")}/')
+                web_app=types.WebAppInfo(url=f'https://{os.getenv("DOMAIN")}:8080/')
             )]
         ],
         resize_keyboard=True
