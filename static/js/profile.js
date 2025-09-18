@@ -116,7 +116,7 @@ function cardClick(gift_id){
 }
 
 const wrapper = document.getElementById('global-wrapper');
-await sleep(3000);
+sleep(3000);
 wrapper.innerHTML = `
 <div class="main">
     <div class="content">
