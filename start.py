@@ -318,7 +318,7 @@ async def run_server():
     if os.path.isfile(ssl_cert) and os.path.isfile(ssl_key):
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ssl_context.load_cert_chain(ssl_cert, ssl_key)
-        port = 443
+        port = 8080
         print(f"Сервер ЗАПУЩЕН на https://0.0.0.0:{port}")
     else:
         print("SSL-сертификаты не найдены, fallback на HTTP")
