@@ -345,6 +345,7 @@ async def handle_get_profile(request: Request):
                 gift_data = all_gifts.get(gift_id)
                 if gift_data:
                     gifts_info.append(gift_data)
+        print(gifts_info)
                     
         return {
             "balance": profile_data.get("balance", 0),
