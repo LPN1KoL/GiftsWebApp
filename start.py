@@ -367,7 +367,7 @@ async def handle_get_gift(request: Request):
         raise HTTPException(status_code=404, detail="Missing user_data")
     
     try:
-        result = await try_get_gift(user_id, gift_id, get_user, send_notification_to_admin)
+        result = await try_get_gift(user_id, gift_id, get_user, send_notification_to_admin, update_user_balance_and_gifts)
         print(result)
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
