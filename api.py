@@ -14,7 +14,8 @@ ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
 async def send_notification_to_admin(user_id, data):
     second_bot = Bot(token=API_TOKEN)
-    username = await second_bot.get_chat(int(user_id)).username
+    info = await second_bot.get_chat(int(user_id))
+    username = info.username
     if username:
         user_id = f"@{username}"
     message_text = (
