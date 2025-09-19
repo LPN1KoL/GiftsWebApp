@@ -5,26 +5,26 @@ from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
 import os
+from aiogram import Bot
 
 load_dotenv()
 
 API_TOKEN = os.getenv("API_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
-def send_win_notification_to_admin(user_id, gift, case_id):
+async def send_notification_to_admin(user_id, data):
+    second_bot = Bot(token=API_TOKEN)
+    username = await second_bot.get_chat(int(user_id)).username
+    if username:
+        user_id = f"@{username}"
     message_text = (
         f"🎉 Кто-то выиграл приз!\n\n"
         f"👤 Пользователь: {user_id}\n"
-        f"🎁 Приз: {gift['name']}\n"
-        f"📦 Кейс ID: {case_id}\n\n"
+        f"🎁 Приз: {data['name']}\n\n"
         f"Отправьте подарок этому пользователю!"
     )
-    url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
-    resp = requests.post(url, json={
-        "chat_id": ADMIN_ID,
-        "text": message_text
-    })
-    print(resp.json())
+    await second_bot.send_message(chat_id=int(ADMIN_ID), text=message_text)
+    await second_bot.close()
 
 
 def take_screenshot_and_process(url, output_path, crop_x, crop_y, crop_size):
@@ -102,3 +102,4 @@ async def get_user_avatar_base64(user_id: int, size: int = 256) -> str:
             black_image.save(buffer, format='JPEG', quality=95)
             base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
             return f"data:image/jpeg;base64,{base64_data}"
+

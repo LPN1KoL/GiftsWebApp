@@ -11,7 +11,7 @@ import os
 import sys
 from db import get_user_balance, get_user_profile_data
 from db import get_user, update_user_balance_and_gifts
-from cases import try_open_case, try_sell_gift
+from cases import try_open_case, try_sell_gift, try_get_gift
 from bot import main as bot_main
 from api import *
 import json
@@ -271,6 +271,7 @@ async def serve_static_files(filename: str):
     raise HTTPException(status_code=404, detail="File not found")
 
 
+#--- API эндпоинты ---
 @app.post("/api/open_case")
 async def handle_open_case(request: Request):
     data = await request.json()
@@ -325,10 +326,52 @@ async def handle_get_profile(request: Request):
     try:
         profile_data = await get_user_profile_data(user_id)
         print(profile_data)
+
+        # Получаем всю информацию о подарках пользователя
+        gifts_ids = profile_data.get("gifts", [])
+        gifts_info = []
+        with open("data/cases.json", "r", encoding="utf-8") as f:
+            cases = json.load(f)
+            all_gifts = {}
+            for case in cases:
+                for gift in case.get("gifts", []):
+                    all_gifts[gift["id"]] = {
+                        "id": gift["id"],
+                        "name": gift["name"],
+                        "image": gift["img"],
+                        "price": gift["price"]
+                    }
+            for gift_id in gifts_ids:
+                gift_data = all_gifts.get(gift_id)
+                if gift_data:
+                    gifts_info.append(gift_data)
+                    
         return {
             "balance": profile_data.get("balance", 0),
-            "gifts": profile_data.get("gifts", [])
+            "gifts": gifts_info
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
+@app.get("/api/get_gift")
+async def handle_get_gift(request: Request):
+    data = request.query_params
+    gift_id = data.get("gift_id")
+    initData = data.get("initData")
+    if not (initData or gift_id):
+        raise HTTPException(status_code=400, detail="Missing 'initData' or 'gift_id'")
+    
+    user_data = await verify_telegram_webapp_data(initData)
+    user_id = user_data.get("id")
+    if not user_id:
+        raise HTTPException(status_code=404, detail="Missing user_data")
+    
+    try:
+        result = await try_get_gift(user_id, gift_id, get_user, send_notification_to_admin)
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
+        return JSONResponse(status_code=200, content=result)
     except Exception as e:
         raise HTTPException(status_code=500, detail="Internal server error")
 

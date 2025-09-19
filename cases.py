@@ -117,3 +117,20 @@ async def try_sell_gift(user_id, gift_id, get_user, update_user_balance_and_gift
     gifts_list.remove(gift_id)
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
     return {"success": True}
+
+
+async def try_get_gift(user_id, gift_id, get_user, send_notification_to_admin, update_user_balance_and_gifts):
+    row = await get_user(user_id)
+    if not row:
+        return {"error": "Пользователь не найден"}
+    balance, gifts_raw = row
+    gifts_list = json.loads(gifts_raw) if gifts_raw else []
+    if gift_id not in gifts_list:
+        return {"error": "Подарок не найден в инвентаре"}
+    cases = load_cases()
+    data = {"name": gift["name"] for case in cases for gift in case["gifts"] if gift["id"] == gift_id}
+    if not data:
+        return {"error": "Информация о подарке не найдена"}
+    await update_user_balance_and_gifts(user_id, balance, gifts_list.remove(gift_id))
+    await send_notification_to_admin(user_id, data)
+    return {"success": True}

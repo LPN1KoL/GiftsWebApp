@@ -65,11 +65,6 @@ async function updateProfile() {
             avatarElement.src = tg.initDataUnsafe.user.photo_url;
         }
 
-        //Обновляем ссылку на кейс
-        if (localStorage.getItem('case_id')) {
-            caseId = localStorage.getItem('case_id');
-            document.getElementById('main_link').href = `/main?case_id=${caseId}`;
-        }
 
         // Отображаем подарки
         const cardList = document.querySelector('.card-list');
@@ -80,10 +75,12 @@ async function updateProfile() {
                 result.gifts.forEach(gift => {
                     const card = document.createElement('div');
                     card.classList.add('card');
+                    card.onclick = () => cardClick(gift.id);
+                    card.id = 'card-' + gift.id;
 
                     card.innerHTML = `
                         <div class="gift-img">
-                            <img class="gimg" src="${gift.img}" alt="${gift.name}">
+                            <img class="gimg" src="${gift.image}" alt="${gift.name}">
                         </div>
                         <h2 class="name">${gift.name}</h2>
                         <div class="price">
@@ -117,15 +114,76 @@ async function updateProfile() {
 }
 
 
-function cardClick(gift_id){
-    card = document.getElementById('card ' + gift_id) // Можно получить цену, картинку, подставить в всплывающее окно
-    document.querySelector('.modal').classList.add('active');
-}
-
-
 // Загружаем профиль при загрузке страницы
 if (tg) {
     updateProfile();
 } else {
     alert("WebApp не инициализирован");
+}
+
+//Обновляем ссылку на кейс
+if (localStorage.getItem('case_id')) {
+    caseId = localStorage.getItem('case_id');
+    document.getElementById('main_link').href = `/main?case_id=${caseId}`;
+}
+
+async function sell_gift(gift_id){
+    const btn = document.getElementById('sell_btn');
+    try {
+        btn.setAttribute('disabled', '');
+        btn.innerText = 'Подождите...';
+        btn.style.backgroundColor = '#255ea0';
+        const tg = window.Telegram?.WebApp;
+        const result = await sendApiRequest('/api/sell_gift', { initData: tg.initData, gift_id: gift_id });
+        if (result && result.success) {
+            window.location.reload();
+            return;
+        } else {
+            alert('Ошибка при продаже подарка');
+            console.error("Ошибка при продаже подарка:", result);
+        }
+
+    } catch (err) {
+        console.error("Ошибка при продаже подарка:", err);
+        alert('Ошибка при продаже подарка');
+    } finally {
+        document.querySelector('.modal').classList.remove('active');
+        btn.removeAttribute('disabled');
+        btn.innerText = 'Продать';
+        btn.style.backgroundColor = '#3281dc';
+    }
+    
+}
+
+function cardClick(gift_id){
+    card = document.getElementById('card-' + gift_id) // Можно получить цену, картинку, подставить в всплывающее окно
+    image = card.querySelector('.gimg').src
+    price = card.querySelector('.ct h2').textContent
+    modal = document.querySelector('.modal')
+    modal.querySelector('.img img').src = image
+    modal.querySelector('.cnt h2').textContent = price
+    modal.getElementById("get_gift").onclick = () => get_gift(gift.id);
+    modal.getElementById("sell_gift").onclick = () => sell_gift(gift.id);
+    modal.classList.add('active');
+}
+
+async function get_gift(gift_id){
+    const btn = document.getElementById('get_gift');
+    btn.setAttribute('disabled', '');
+    btn.innerText = 'Подождите...';
+    btn.style.backgroundColor = '#255ea0';
+    const result = await sendApiRequest('/api/get_gift', { gift_id: gift_id, initData: tg.initData });
+    
+    if (result && result.success) {
+        alert("Запрос на вывод подарка отправлен!");
+        window.location.reload();
+    } else {
+        alert('Ошибка при получении подарка');
+        console.error("Ошибка при получении подарка:", result);
+    }
+
+    document.querySelector('.modal').classList.remove('active');
+    btn.removeAttribute('disabled');
+    btn.innerText = 'Получить';
+    btn.style.backgroundColor = '#3281dc';
 }
