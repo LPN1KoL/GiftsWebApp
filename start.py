@@ -353,7 +353,7 @@ async def handle_get_profile(request: Request):
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@app.get("/api/get_gift")
+@app.post("/api/get_gift")
 async def handle_get_gift(request: Request):
     data = request.query_params
     gift_id = data.get("gift_id")

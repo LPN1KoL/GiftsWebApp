@@ -128,7 +128,7 @@ if (localStorage.getItem('case_id')) {
 }
 
 async function sell_gift(gift_id){
-    const btn = document.getElementById('sell_btn');
+    const btn = document.getElementById('sell_gift');
     try {
         btn.setAttribute('disabled', '');
         btn.innerText = 'Подождите...';
