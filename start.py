@@ -340,6 +340,7 @@ async def handle_get_profile(request: Request):
                     "image": gift["img"],
                     "price": gift["price"]
                 }
+        print(gifts_ids)
         for gift_id in gifts_ids:
             gift_data = all_gifts.get(gift_id)
             if gift_data:
