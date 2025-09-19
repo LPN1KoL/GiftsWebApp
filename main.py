@@ -1,22 +1,32 @@
 import threading
 import asyncio
+import signal
+import sys
 from start import run_server
 from bot import main as bot_main
 
+stop_event = threading.Event()
+
 def run_server_thread():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     try:
-        asyncio.run(run_server())
-    except KeyboardInterrupt:
-        print("Server stopped")
+        loop.run_until_complete(run_server())
+    finally:
+        loop.close()
+
+def signal_handler(sig, frame):
+    print("Stopping...")
+    stop_event.set()
+    sys.exit(0)
 
 if __name__ == "__main__":
-    print("Starting server and bot...")
+    signal.signal(signal.SIGINT, signal_handler)
 
-    # Start server in a separate thread
     server_thread = threading.Thread(target=run_server_thread, daemon=True)
     server_thread.start()
 
-    print("Server started, starting bot...")
-
-    # Start bot in the main thread
-    asyncio.run(bot_main())
+    try:
+        asyncio.run(bot_main())
+    except KeyboardInterrupt:
+        print("Bot stopped")
