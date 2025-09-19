@@ -325,6 +325,7 @@ async def handle_get_profile(request: Request):
 
     #try:
     profile_data = await get_user_profile_data(user_id)
+    print(profile_data)
 
     # Получаем всю информацию о подарках пользователя
     gifts_ids = json.loads(profile_data.get("gifts_json", "[]"))
