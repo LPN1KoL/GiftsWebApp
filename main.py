@@ -1,32 +1,30 @@
-import threading
 import asyncio
+import threading
 import signal
-import sys
 from start import run_server
 from bot import main as bot_main
 
-stop_event = threading.Event()
-
-def run_server_thread():
-    loop = asyncio.new_event_loop()
+def run_server_thread(loop):
     asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(run_server())
-    finally:
-        loop.close()
-
-def signal_handler(sig, frame):
-    print("Stopping...")
-    stop_event.set()
-    sys.exit(0)
+    loop.run_until_complete(run_server())
 
 if __name__ == "__main__":
-    signal.signal(signal.SIGINT, signal_handler)
-
-    server_thread = threading.Thread(target=run_server_thread, daemon=True)
+    server_loop = asyncio.new_event_loop()
+    server_thread = threading.Thread(target=run_server_thread, args=(server_loop,), daemon=True)
     server_thread.start()
 
+    loop = asyncio.get_event_loop()
+
+    def stop_all():
+        print("SIGINT received, stopping...")
+        for task in asyncio.all_tasks(loop):
+            task.cancel()
+        server_loop.call_soon_threadsafe(server_loop.stop)
+        loop.stop()
+
+    loop.add_signal_handler(signal.SIGINT, stop_all)
+
     try:
-        asyncio.run(bot_main())
-    except KeyboardInterrupt:
-        print("Bot stopped")
+        loop.run_until_complete(bot_main())
+    except asyncio.CancelledError:
+        pass
