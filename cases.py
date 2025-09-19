@@ -131,12 +131,10 @@ async def try_get_gift(user_id, gift_id, get_user, send_notification_to_admin, u
     data = {"name": gift["name"] for case in cases for gift in case["gifts"] if gift["id"] == gift_id}
     if not data:
         return {"error": "Информация о подарке не найдена"}
-    print(gifts_list)
-    print(gifts_list.remove(gift_id))
     try:
-        new_list = gifts_list.remove(gift_id)
+        gifts_list.remove(gift_id)
     except ValueError as e:
         return {"error": "Ошибка при удалении подарка из инвентаря"}
-    await update_user_balance_and_gifts(user_id, balance, new_list)
+    await update_user_balance_and_gifts(user_id, balance, gifts_list)
     await send_notification_to_admin(user_id, data)
     return {"success": True}

@@ -323,37 +323,34 @@ async def handle_get_profile(request: Request):
     if not user_id:
         raise HTTPException(status_code=400, detail="Missing 'user_id'")
 
-    #try:
-    profile_data = await get_user_profile_data(user_id)
-    print(profile_data)
+    try:
+        profile_data = await get_user_profile_data(user_id)
 
-    # Получаем всю информацию о подарках пользователя
-    gifts_ids = json.loads(profile_data.get("gifts_json", "[]"))
-    gifts_info = []
-    with open("data/cases.json", "r", encoding="utf-8") as f:
-        cases = json.load(f)
-        all_gifts = {}
-        for case in cases:
-            for gift in case.get("gifts", []):
-                all_gifts[gift["id"]] = {
-                    "id": gift["id"],
-                    "name": gift["name"],
-                    "image": gift["img"],
-                    "price": gift["price"]
-                }
-        print(gifts_ids)
-        for gift_id in gifts_ids:
-            gift_data = all_gifts.get(gift_id)
-            if gift_data:
-                gifts_info.append(gift_data)
+        # Получаем всю информацию о подарках пользователя
+        gifts_ids = json.loads(profile_data.get("gifts_json", "[]"))
+        gifts_info = []
+        with open("data/cases.json", "r", encoding="utf-8") as f:
+            cases = json.load(f)
+            all_gifts = {}
+            for case in cases:
+                for gift in case.get("gifts", []):
+                    all_gifts[gift["id"]] = {
+                        "id": gift["id"],
+                        "name": gift["name"],
+                        "image": gift["img"],
+                        "price": gift["price"]
+                    }
+            for gift_id in gifts_ids:
+                gift_data = all_gifts.get(gift_id)
+                if gift_data:
+                    gifts_info.append(gift_data)
 
-    return {
-        "balance": profile_data.get("balance", 0),
-        "gifts": gifts_info
-    }
-    #except Exception as e:
-        #print(e)
-        #raise HTTPException(status_code=500, detail="Internal server error")
+        return {
+            "balance": profile_data.get("balance", 0),
+            "gifts": gifts_info
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 @app.post("/api/get_gift")
@@ -371,7 +368,6 @@ async def handle_get_gift(request: Request):
     
     try:
         result = await try_get_gift(user_id, gift_id, get_user, send_notification_to_admin, update_user_balance_and_gifts)
-        print(result)
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
         return JSONResponse(status_code=200, content=result)
