@@ -350,6 +350,7 @@ async def handle_get_profile(request: Request):
             "gifts": gifts_info
         }
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
