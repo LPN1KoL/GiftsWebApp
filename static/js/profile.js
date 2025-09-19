@@ -103,7 +103,7 @@ async function updateProfile() {
                 document.getElementById("wrap").innerHTML = ""
             }
         }
-        document.getElementById('loading-wrapper').style.display = 'none';
+        document.querySelector('.loading-wrapper').style.display = 'none';
         document.querySelector('.main').style.display = 'block';
 
     } catch (err) {
