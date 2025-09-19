@@ -191,9 +191,8 @@ function sleep(ms) {
 }
 
 async function sell_gift(gift_id){
-
+    const btn = document.getElementById('sell_btn');
     try {
-        const btn = document.getElementById('sell_btn');
         btn.setAttribute('disabled', '');
         btn.innerText = 'Подождите...';
         btn.style.backgroundColor = '#255ea0';
