@@ -355,7 +355,7 @@ async def handle_get_profile(request: Request):
 
 @app.post("/api/get_gift")
 async def handle_get_gift(request: Request):
-    data = request.query_params
+    data = await request.json()
     gift_id = data.get("gift_id")
     initData = data.get("initData")
     if not (initData or gift_id):
@@ -368,6 +368,7 @@ async def handle_get_gift(request: Request):
     
     try:
         result = await try_get_gift(user_id, gift_id, get_user, send_notification_to_admin)
+        print(result)
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
         return JSONResponse(status_code=200, content=result)

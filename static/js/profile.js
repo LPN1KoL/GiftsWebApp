@@ -132,7 +132,7 @@ async function sell_gift(gift_id){
     try {
         btn.setAttribute('disabled', '');
         btn.innerText = 'Подождите...';
-        btn.style.backgroundColor = '#255ea0';
+        btn.style.backgroundColor = '#227734ff';
         const tg = window.Telegram?.WebApp;
         const result = await sendApiRequest('/api/sell_gift', { initData: tg.initData, gift_id: gift_id });
         if (result && result.success) {
@@ -150,7 +150,7 @@ async function sell_gift(gift_id){
         document.querySelector('.modal').classList.remove('active');
         btn.removeAttribute('disabled');
         btn.innerText = 'Продать';
-        btn.style.backgroundColor = '#3281dc';
+        btn.style.backgroundColor = '#4ABD33';
     }
     
 }
