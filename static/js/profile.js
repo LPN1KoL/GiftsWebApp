@@ -118,4 +118,12 @@ function cardClick(gift_id){
 }
 
 
+Document.addEventListener('DOMContentLoaded', async () => {
+    if (!tg) {
+        alert("WebApp не инициализирован");
+        return;
+    }
 
+    // Обновляем профиль
+    await updateProfile();
+});
