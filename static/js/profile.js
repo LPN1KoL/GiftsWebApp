@@ -40,6 +40,11 @@ function sleep(ms) {
 
 async function updateProfile() {
     try {
+        const user_id = tg.initDataUnsafe?.user?.id;
+        if (!user_id) {
+            alert("Ошибка: Не удалось определить Telegram ID");
+            return;
+        }
         const result = await sendApiRequest('/api/get_profile', { user_id });
         
         // Обновляем баланс
