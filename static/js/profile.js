@@ -162,8 +162,8 @@ function cardClick(gift_id){
     modal = document.querySelector('.modal')
     modal.querySelector('.img img').src = image
     modal.querySelector('h2').textContent = price
-    document.getElementById("get_gift").onclick = () => get_gift(gift.id);
-    document.getElementById("sell_gift").onclick = () => sell_gift(gift.id);
+    document.getElementById("get_gift").onclick = () => get_gift(gift_id);
+    document.getElementById("sell_gift").onclick = () => sell_gift(gift_id);
     modal.classList.add('active');
 }
 
