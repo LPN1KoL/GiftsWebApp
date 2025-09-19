@@ -373,6 +373,7 @@ async def handle_get_gift(request: Request):
             raise HTTPException(status_code=400, detail=result["error"])
         return JSONResponse(status_code=200, content=result)
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
