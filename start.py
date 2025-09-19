@@ -328,7 +328,7 @@ async def handle_get_profile(request: Request):
         print(profile_data)
 
         # Получаем всю информацию о подарках пользователя
-        gifts_ids = profile_data.get("gifts", [])
+        gifts_ids = json.loads(profile_data.get("gifts_json", "[]"))
         gifts_info = []
         with open("data/cases.json", "r", encoding="utf-8") as f:
             cases = json.load(f)
@@ -346,7 +346,7 @@ async def handle_get_profile(request: Request):
                 if gift_data:
                     gifts_info.append(gift_data)
         print(gifts_info)
-                    
+
         return {
             "balance": profile_data.get("balance", 0),
             "gifts": gifts_info
