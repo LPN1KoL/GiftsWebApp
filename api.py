@@ -6,6 +6,7 @@ from PIL import Image
 from dotenv import load_dotenv
 import os
 from aiogram import Bot
+import asyncio
 
 load_dotenv()
 
@@ -25,6 +26,7 @@ async def send_notification_to_admin(user_id, data):
         f"Отправьте подарок этому пользователю!"
     )
     await second_bot.send_message(chat_id=int(ADMIN_ID), text=message_text)
+    await asyncio.sleep(5)  # Небольшая задержка, чтобы избежать проблем с закрытием сессии
     await second_bot.close()
 
 
