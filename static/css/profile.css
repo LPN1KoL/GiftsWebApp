@@ -411,6 +411,10 @@ html, body{
     border-radius: 3px;
 }
 
+.prog0 {
+    width: 0%;
+}
+
 .prog5 {
     width: 5%;
 }

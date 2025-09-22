@@ -153,8 +153,10 @@ def check_subscription_sync(user_id: int, channel_id: int):
         response.raise_for_status()
         
         member_info = response.json()
+        print(member_info)
         if member_info.get('ok'):
             status = member_info['result']['status']
+            print(status)
             return status != 'left' and status != 'kicked'
         
         return False
