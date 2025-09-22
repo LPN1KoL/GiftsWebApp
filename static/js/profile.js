@@ -105,8 +105,9 @@ async function updateProfile() {
                 document.getElementById("wrap").innerHTML = ""
             }
         }
-
-        if (!result.subscribed) {
+        
+        console.log(result.subscribed)
+        if (result.subscribed == False) {
             document.getElementById("quest-subscribe").style.display = "none";
         }
 
