@@ -106,8 +106,8 @@ async function updateProfile() {
             }
         }
         
-        console.log(result.subscribed)
-        if (result.subscribed == false) {
+        
+        if (result.subscribed) {
             document.getElementById("quest-subscribe").style.display = "none";
         }
 
