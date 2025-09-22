@@ -82,23 +82,24 @@ async def get_user_profile_data(user_id):
 
 async def update_user_tasks(user_id, subscribed=None, today_opened_cases=None, last_visit=None, everyday_visits=None):
     conn = await asyncpg.connect(**DB_CONFIG)
-    query = "UPDATE users SET "
-    params = []
+    fields = []
+    values = []
     if subscribed is not None:
-        query += "subscribed = $1, "
-        params.append(subscribed)
+        fields.append("subscribed = ${}".format(len(values) + 1))
+        values.append(bool(subscribed))
     if today_opened_cases is not None:
-        query += "today_opened_cases = $2, "
-        params.append(today_opened_cases)
+        fields.append("today_opened_cases = ${}".format(len(values) + 1))
+        values.append(int(today_opened_cases))
     if last_visit is not None:
-        query += "last_visit = $3, "
-        params.append(last_visit)
+        fields.append("last_visit = ${}".format(len(values) + 1))
+        values.append(int(last_visit))
     if everyday_visits is not None:
-        query += "everyday_visits = $4, "
-        params.append(everyday_visits)
-    query = query.rstrip(", ") + " WHERE user_id = $" + str(len(params) + 1)
-    params.append(user_id)
-    await conn.execute(query, *params)
+        fields.append("everyday_visits = ${}".format(len(values) + 1))
+        values.append(int(everyday_visits))
+    if fields:
+        query = f"UPDATE users SET {', '.join(fields)} WHERE user_id = ${len(values) + 1}"
+        values.append(user_id)
+        await conn.execute(query, *values)
     await conn.close()
 
 async def get_user_tasks(user_id):
