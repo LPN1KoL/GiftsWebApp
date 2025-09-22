@@ -386,6 +386,7 @@ async def handle_get_profile(request: Request):
             "subscribed": subscribed
         }
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
@@ -430,6 +431,8 @@ async def handle_update_last_visit(request: Request):
         today = int(datetime.now().timestamp()) // 86400
         if tasks["last_visit"] == today - 1:
             await update_user_tasks(user_id, last_visit=today, everyday_visits=tasks["everyday_visits"] + 1)
+        elif tasks["last_vizit"] == today:
+            pass
         else:
             await update_user_tasks(user_id, last_visit=today, everyday_visits=1)
         
