@@ -430,11 +430,11 @@ async def handle_update_last_visit(request: Request):
         # Обновляем last_visit
         today = int(datetime.now().timestamp()) // 86400
         if tasks["last_visit"] == today - 1:
-            await update_user_tasks(user_id, last_visit=today, everyday_visits=tasks["everyday_visits"] + 1)
+            await update_user_tasks(user_id, last_visit=today, everyday_visits=tasks["everyday_visits"] + 1, today_opened_cases=0)
         elif tasks["last_visit"] == today:
             pass
         else:
-            await update_user_tasks(user_id, last_visit=today, everyday_visits=1)
+            await update_user_tasks(user_id, last_visit=today, everyday_visits=1, today_opened_cases=0)
         
         return JSONResponse(status_code=200, content={"success": True})
     except Exception as e:
