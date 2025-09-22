@@ -22,8 +22,11 @@ if (localStorage.getItem('case_id')) {
     caseId = localStorage.getItem('case_id');
     document.getElementById("main_link").href = "/main?case_id=" + caseId;
 }
-let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
 
+let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+if (!user_id) {
+    window.location.href = "/404";
+}
 
 
 async function sendApiRequest(endpoint, data) {
@@ -214,3 +217,9 @@ async function sell_gift(gift_id){
     }
     
 }
+
+async function updateUserLastVisit() {
+    await sendApiRequest('/api/update_last_visit', { init_data: window.Telegram?.WebApp?.initData });
+}
+
+updateUserLastVisit();

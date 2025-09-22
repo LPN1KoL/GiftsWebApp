@@ -5,7 +5,6 @@ from io import BytesIO
 from PIL import Image
 from dotenv import load_dotenv
 import os
-from aiogram import Bot
 import asyncio
 
 load_dotenv()
@@ -35,7 +34,7 @@ def send_notification_to_admin_sync(user_id: int, data):
     
     # Формируем текст сообщения
     message_text = (
-        f"🎉 Кто-то выиграл приз!\n\n"
+        f"🎉 Кто-то подал заявку на вывод!\n\n"
         f"👤 Пользователь: {user_mention}\n"
         f"🎁 Приз: {data['name']}\n\n"
         f"Отправьте подарок этому пользователю!"
@@ -135,3 +134,36 @@ async def get_user_avatar_base64(user_id: int, size: int = 256) -> str:
             base64_data = base64.b64encode(buffer.getvalue()).decode('utf-8')
             return f"data:image/jpeg;base64,{base64_data}"
 
+
+def check_subscription_sync(user_id: int, channel_id: int):
+    """
+    Упрощенная синхронная функция проверки подписки
+    Возвращает только boolean результат
+    """
+    try:
+        get_member_url = f"https://api.telegram.org/bot{API_TOKEN}/getChatMember"
+        response = requests.post(
+            get_member_url,
+            json={
+                "chat_id": channel_id,
+                "user_id": user_id
+            },
+            timeout=10
+        )
+        response.raise_for_status()
+        
+        member_info = response.json()
+        if member_info.get('ok'):
+            status = member_info['result']['status']
+            return status != 'left' and status != 'kicked'
+        
+        return False
+        
+    except:
+        return False
+
+async def check_subscription(user_id: int, channel_id: int):
+    """
+    Асинхронная обертка для упрощенной версии
+    """
+    return await asyncio.to_thread(check_subscription_sync, user_id, channel_id)

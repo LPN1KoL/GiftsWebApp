@@ -1,6 +1,11 @@
 const tg = window.Telegram?.WebApp;
 tg.expand();
 
+
+if (!tg.initDataUnsafe?.user?.id) {
+    window.location.href = "/404";
+}
+
 function plus_func(){
     if (!tg) {
         alert("WebApp не инициализирован");
@@ -100,6 +105,33 @@ async function updateProfile() {
                 document.getElementById("wrap").innerHTML = ""
             }
         }
+
+        if (!result.subscribed) {
+            document.getElementById("quest-subscribe").style.display = "none";
+        }
+
+        if (result.today_opened_cases >= 10) {
+            document.getElementById("quest-open-case-10").style.display = "none";
+        } else {
+            document.getElementById("quest-open-case-10").querySelector(".progress h2").textContent = `${result.today_opened_cases * 10}%`;
+            document.getElementById("quest-open-case-10").querySelector(".bar").classList.add(`prog${result.today_opened_cases * 10}`);
+        }
+
+        if (result.today_opened_cases >= 25) {
+            document.getElementById("quest-open-case-25").style.display = "none";
+        } else {
+            document.getElementById("quest-open-case-25").querySelector(".progress h2").textContent = `${result.today_opened_cases * 4}%`;
+            document.getElementById("quest-open-case-25").querySelector(".bar").classList.add(`prog${result.today_opened_cases * 4}`);
+        }
+
+        if (result.everyday_visits >= 25) {
+            document.getElementById("quest-login-25").style.display = "none";
+        } else {
+            document.getElementById("quest-login-25").querySelector(".progress h2").textContent = `${result.everyday_visits * 4}%`;
+            document.getElementById("quest-login-25").querySelector(".bar").classList.add(`prog${result.everyday_visits * 4}`);
+        }
+
+
         document.querySelector('.loading-wrapper').style.display = 'none';
         document.querySelector('.main').style.display = 'block';
 
