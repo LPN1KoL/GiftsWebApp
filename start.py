@@ -291,6 +291,7 @@ async def handle_open_case(request: Request):
 
     tasks = await get_user_tasks(user_id)
     if tasks["last_visit"] != int(datetime.now().timestamp()) // 86400:
+        print(int(datetime.now().timestamp()) // 86400)
         await update_user_tasks(user_id, last_visit=int(datetime.now().timestamp()) // 86400, today_opened_cases=1)
     else:
         await update_user_tasks(user_id, today_opened_cases=tasks["today_opened_cases"] + 1)
