@@ -13,21 +13,50 @@ load_dotenv()
 API_TOKEN = os.getenv("API_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
-async def send_notification_to_admin(user_id, data):
-    second_bot = Bot(token=API_TOKEN)
-    info = await second_bot.get_chat(int(user_id))
-    username = info.username
-    if username:
-        user_id = f"@{username}"
+def send_notification_to_admin_sync(user_id: int, data):
+    """
+    Синхронная функция для отправки уведомления администратору
+    """
+    try:
+        # Получаем информацию о пользователе
+        get_chat_url = f"https://api.telegram.org/bot{API_TOKEN}/getChat"
+        response = requests.post(get_chat_url, json={"chat_id": user_id}, timeout=10)
+        response.raise_for_status()
+        
+        info = response.json()
+        if info.get('ok'):
+            username = info['result'].get('username')
+            user_mention = f"@{username}" if username else str(user_id)
+        else:
+            user_mention = str(user_id)
+            
+    except requests.RequestException:
+        user_mention = str(user_id)
+    
+    # Формируем текст сообщения
     message_text = (
         f"🎉 Кто-то выиграл приз!\n\n"
-        f"👤 Пользователь: {user_id}\n"
+        f"👤 Пользователь: {user_mention}\n"
         f"🎁 Приз: {data['name']}\n\n"
         f"Отправьте подарок этому пользователю!"
     )
-    await second_bot.send_message(chat_id=int(ADMIN_ID), text=message_text)
-    await asyncio.sleep(5)  # Небольшая задержка, чтобы избежать проблем с закрытием сессии
-    await second_bot.close()
+    
+    # Отправляем сообщение администратору
+    try:
+        send_message_url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
+        requests.post(send_message_url, json={
+            "chat_id": ADMIN_ID,
+            "text": message_text
+        }, timeout=10)
+    except requests.RequestException:
+        print("Failed to send notification to admin")
+        pass
+
+async def send_notification_to_admin(user_id: int, data):
+    """
+    Асинхронная обертка для синхронной функции
+    """
+    await asyncio.to_thread(send_notification_to_admin_sync, user_id, data)
 
 
 def take_screenshot_and_process(url, output_path, crop_x, crop_y, crop_size):
