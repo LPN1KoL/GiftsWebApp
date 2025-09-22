@@ -428,9 +428,7 @@ async def handle_update_last_visit(request: Request):
         tasks = await get_user_tasks(user_id)
         # Обновляем last_visit
         today = int(datetime.now().timestamp()) // 86400
-        print(tasks)
-        print(int(datetime.now().timestamp()) // 86400)
-        if tasks["last_visit"] == today:  # Текущий день в формате дней с 1970-01-01
+        if tasks["last_visit"] == today - 1:
             await update_user_tasks(user_id, last_visit=today, everyday_visits=tasks["everyday_visits"] + 1)
         else:
             await update_user_tasks(user_id, last_visit=today, everyday_visits=1)
