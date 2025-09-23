@@ -289,18 +289,19 @@ async def handle_open_case(request: Request):
         update_user_balance_and_gifts
     )
 
-    tasks = await get_user_tasks(user_id)
-    if tasks["last_visit"] != int(datetime.now().timestamp()) // 86400:
-        await update_user_tasks(user_id, last_visit=int(datetime.now().timestamp()) // 86400, today_opened_cases=1)
-    else:
-        await update_user_tasks(user_id, today_opened_cases=tasks["today_opened_cases"] + 1)
+    if not "error" in result:
 
-    if tasks.get("today_opened_cases", 0) == 9:
-        await update_user_balance(user_id, 10)  # Бонус 10 монет
-        balance += 10
-    if tasks.get("today_opened_cases", 0) == 24:
-        await update_user_balance(user_id, 25)  # Бонус 25 монет
-        balance += 25
+        tasks = await get_user_tasks(user_id)
+        if tasks["last_visit"] != int(datetime.now().timestamp()) // 86400:
+            await update_user_tasks(user_id, last_visit=int(datetime.now().timestamp()) // 86400, today_opened_cases=1)
+        else:
+            await update_user_tasks(user_id, today_opened_cases=tasks["today_opened_cases"] + 1)
+
+        if tasks.get("today_opened_cases", 0) == 9:
+            await update_user_balance(user_id, 10)  # Бонус 10 монет
+            
+        if tasks.get("today_opened_cases", 0) == 24:
+            await update_user_balance(user_id, 25)  # Бонус 25 монет
 
     return JSONResponse(status_code=200, content=result)
 
