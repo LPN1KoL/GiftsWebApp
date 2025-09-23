@@ -217,6 +217,6 @@ async function get_gift(gift_id){
 
     document.querySelector('.modal').classList.remove('active');
     btn.removeAttribute('disabled');
-    btn.innerText = 'Получить';
+    btn.innerText = 'Вывести';
     btn.style.backgroundColor = '#3281dc';
 }

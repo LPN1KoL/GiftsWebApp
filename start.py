@@ -302,11 +302,6 @@ async def handle_open_case(request: Request):
         await update_user_balance(user_id, 25)  # Бонус 25 монет
         balance += 25
 
-    if "error" in result:
-        if "Недостаточно средств" in result["error"]:
-            raise HTTPException(status_code=401, detail=result["error"])
-        raise HTTPException(status_code=400, detail=result["error"])
-
     return JSONResponse(status_code=200, content=result)
 
 

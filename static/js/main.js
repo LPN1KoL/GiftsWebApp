@@ -30,25 +30,16 @@ if (!user_id) {
 
 
 async function sendApiRequest(endpoint, data) {
-    try {
-        const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-        const json = await response.json();
-        resp = {
-            json,
-            "status": response.status
-        }
-        if (response.status != 200 || response.status != 401) {
-            throw new Error(json.error || "Unknown error");
-        }
-        return resp;
-    } catch (error) {
-        console.error("Ошибка запроса:", error);
-        throw error;
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    });
+    const json = await response.json();
+    if (!response.ok) {
+        throw new Error(json.error || "Unknown error");
     }
+    return json;
 }
 
 
@@ -137,11 +128,6 @@ async function open_case() {
 
         console.log(result)
 
-        if (result.status == 401){
-            alert("Недостаточно средств")
-            return
-        }
-
         if (result) {
         
             const wonGift = result.gift;
@@ -176,7 +162,7 @@ async function open_case() {
         
     } catch (error) {
         console.error(error)
-        alert('Ошибка при открытии кейса');
+        alert(error);
     }
 
     btn.removeAttribute('disabled');
