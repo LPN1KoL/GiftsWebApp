@@ -132,6 +132,10 @@ async function updateProfile() {
             document.getElementById("quest-login-25").querySelector(".bar").classList.add(`prog${result.everyday_visits * 4}`);
         }
 
+        if ((result.everyday_visits >= 25) && (result.today_opened_cases >= 25) && (result.today_opened_cases >= 10) && result.subscribed){
+            document.querySelector(".quests_h").style.display = "none";
+        }
+
 
         document.querySelector('.loading-wrapper').style.display = 'none';
         document.querySelector('.main').style.display = 'block';
