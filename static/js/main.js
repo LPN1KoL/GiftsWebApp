@@ -38,7 +38,7 @@ async function sendApiRequest(endpoint, data) {
         });
         const json = await response.json();
         resp = {
-            ...json,
+            json,
             "status": response.status
         }
         if (response.status != 200 || response.status != 401) {
