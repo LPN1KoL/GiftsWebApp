@@ -295,6 +295,13 @@ async def handle_open_case(request: Request):
     else:
         await update_user_tasks(user_id, today_opened_cases=tasks["today_opened_cases"] + 1)
 
+    if tasks.get("today_opened_cases", 0) == 9:
+        await update_user_balance(user_id, 10)  # Бонус 10 монет
+        balance += 10
+    if tasks.get("today_opened_cases", 0) == 24:
+        await update_user_balance(user_id, 25)  # Бонус 25 монет
+        balance += 25
+
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
 
@@ -363,12 +370,6 @@ async def handle_get_profile(request: Request):
         else:
             everyday_visits = profile_data.get("everyday_visits", 0)
         
-        if profile_data.get("today_opened_cases", 0) >= 10:
-            await update_user_balance(user_id, 10)  # Бонус 10 монет
-            balance += 10
-        if profile_data.get("today_opened_cases", 0) >= 25:
-            await update_user_balance(user_id, 25)  # Бонус 25 монет
-            balance += 25
         
         subscribed = profile_data.get("subscribed", False)
         if not subscribed:
