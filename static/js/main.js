@@ -37,10 +37,14 @@ async function sendApiRequest(endpoint, data) {
             body: JSON.stringify(data)
         });
         const json = await response.json();
-        if (!response.ok) {
+        resp = {
+            ...json,
+            "status": response.status
+        }
+        if (response.status != 200 || response.status != 401) {
             throw new Error(json.error || "Unknown error");
         }
-        return json;
+        return resp;
     } catch (error) {
         console.error("Ошибка запроса:", error);
         throw error;
@@ -130,6 +134,13 @@ async function open_case() {
             init_data: tg.initData,
             case_id: document.getElementById('data-block').dataset.caseId
         });
+
+        console.log(result)
+
+        if (result.status == 401){
+            alert("Недостаточно средств")
+            return
+        }
 
         if (result) {
         
