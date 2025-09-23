@@ -150,7 +150,7 @@ async function open_case() {
             } else {
                 alert('Подарок не найден');
             }
-            await sleep(100);
+            await sleep(300);
             renderSlider();
         }
         else {
