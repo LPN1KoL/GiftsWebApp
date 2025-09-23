@@ -303,6 +303,9 @@ async def handle_open_case(request: Request):
         balance += 25
 
     if "error" in result:
+        if "Недостаточно средств" in result["error"]:
+            print(result)
+            raise HTTPException(status_code=401, detail=result["error"])
         raise HTTPException(status_code=400, detail=result["error"])
 
     return JSONResponse(status_code=200, content=result)
