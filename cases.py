@@ -75,7 +75,7 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
         return {"error": "Пользователь не найден"}
     balance, gifts_raw = row
     if balance < price:
-        return {"error": f"Недостаточно средств: нужно {price - balance}₽"}
+        return {"error": f"Недостаточно средств"}
     rnd = random.random()
     cumulative = 0
     selected_gift = None

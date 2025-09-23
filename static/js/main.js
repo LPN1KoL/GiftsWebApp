@@ -155,7 +155,7 @@ async function open_case() {
         }
         else {
             console.error(result)
-            alert(error);
+            alert(result.error);
         }
         
     } catch (error) {
