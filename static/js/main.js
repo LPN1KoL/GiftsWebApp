@@ -126,9 +126,7 @@ async function open_case() {
             case_id: document.getElementById('data-block').dataset.caseId
         });
 
-        console.log(result)
-
-        if (result) {
+        if (!result.error) {
         
             const wonGift = result.gift;
 
@@ -157,12 +155,12 @@ async function open_case() {
         }
         else {
             console.error(result)
-            alert("Ошибка при открытии кейса");
+            alert(error);
         }
         
     } catch (error) {
         console.error(error)
-        alert(error);
+        alert("Ошибка при открытии кейса");
     }
 
     btn.removeAttribute('disabled');
