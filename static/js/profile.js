@@ -177,6 +177,7 @@ async function sell_gift(gift_id){
         } else {
             alert('Ошибка при продаже подарка');
             console.error("Ошибка при продаже подарка:", result);
+            window.location.reload();
         }
 
     } catch (err) {
@@ -213,7 +214,7 @@ async function get_gift(gift_id){
 
         if (result && result.success) {
             alert("Запрос на вывод подарка отправлен!");
-            document.getElementById('card-' + gift_id).style.display = "none";
+            window.location.reload();
         } else {
             alert('Ошибка при получении подарка');
             console.error("Ошибка при получении подарка:", result);
