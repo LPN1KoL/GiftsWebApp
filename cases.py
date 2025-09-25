@@ -75,7 +75,7 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
         return {"error": "Пользователь не найден"}
     balance, gifts_raw = row
     if balance < price:
-        return {"error": f"Недостаточно средств"}
+        return {"error": "Недостаточно средств"}
     rnd = random.random()
     cumulative = 0
     selected_gift = None
@@ -88,13 +88,16 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
         selected_gift = case["gifts"][-1]
     new_balance = balance - price
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
-    gifts_list.append(selected_gift["id"])
+    image = selected_gift["img"]
+    if selected_gift.get("price", 0) != 0:
+        gifts_list.append(selected_gift["id"])
+        image = '/media/failed.png'
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
     return {
         "gift": {
             "id": selected_gift["id"],
             "name": selected_gift["name"],
-            "image": selected_gift["img"],
+            "image": image,
             "price": selected_gift.get("price", 0)
         }
     }

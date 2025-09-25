@@ -101,13 +101,14 @@ async def get_case_complete_data(case_id, random_length=32):
             # 2. Список всех подарков с fake_chance
             result["gifts"] = []
             for gift in gifts_list:
-                result["gifts"].append({
-                    "id": gift.get("id"),
-                    "name": gift.get("name"),
-                    "image": gift.get("img"),  
-                    "price": gift.get("price"),
-                    "chance": gift.get("fake_chance")
-                })
+                if gift.get("price") != 0:
+                    result["gifts"].append({
+                        "id": gift.get("id"),
+                        "name": gift.get("name"),
+                        "image": gift.get("img"),  
+                        "price": gift.get("price"),
+                        "chance": gift.get("fake_chance")
+                    })
             
             # 3. Список из 32 случайных подарков
             result["random_gifts"] = []

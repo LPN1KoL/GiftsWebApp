@@ -173,8 +173,7 @@ async function sell_gift(gift_id){
         const tg = window.Telegram?.WebApp;
         const result = await sendApiRequest('/api/sell_gift', { initData: tg.initData, gift_id: gift_id });
         if (result && result.success) {
-            window.location.reload();
-            return;
+            document.getElementById('card-' + gift_id).style.display = "none";
         } else {
             alert('Ошибка при продаже подарка');
             console.error("Ошибка при продаже подарка:", result);
@@ -193,7 +192,7 @@ async function sell_gift(gift_id){
 }
 
 function cardClick(gift_id){
-    card = document.getElementById('card-' + gift_id) // Можно получить цену, картинку, подставить в всплывающее окно
+    card = document.getElementById('card-' + gift_id)
     image = card.querySelector('.gimg').src
     price = card.querySelector('.ct h2').textContent
     modal = document.querySelector('.modal')
@@ -209,18 +208,23 @@ async function get_gift(gift_id){
     btn.setAttribute('disabled', '');
     btn.innerText = 'Подождите...';
     btn.style.backgroundColor = '#255ea0';
-    const result = await sendApiRequest('/api/get_gift', { gift_id: gift_id, initData: tg.initData });
+    try{
+        const result = await sendApiRequest('/api/get_gift', { gift_id: gift_id, initData: tg.initData });
 
-    if (result && result.success) {
-        alert("Запрос на вывод подарка отправлен!");
-        window.location.reload();
-    } else {
-        alert('Ошибка при получении подарка');
-        console.error("Ошибка при получении подарка:", result);
+        if (result && result.success) {
+            alert("Запрос на вывод подарка отправлен!");
+            document.getElementById('card-' + gift_id).style.display = "none";
+        } else {
+            alert('Ошибка при получении подарка');
+            console.error("Ошибка при получении подарка:", result);
+        }
+    } catch (err) {
+        console.error("Ошибка при продаже подарка:", err);
+        alert('Ошибка при выводе подарка');
+    } finally {
+        document.querySelector('.modal').classList.remove('active');
+        btn.removeAttribute('disabled');
+        btn.innerText = 'Вывести';
+        btn.style.backgroundColor = '#3281dc';
     }
-
-    document.querySelector('.modal').classList.remove('active');
-    btn.removeAttribute('disabled');
-    btn.innerText = 'Вывести';
-    btn.style.backgroundColor = '#3281dc';
 }
