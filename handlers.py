@@ -348,9 +348,6 @@ async def handle_gift_edit(callback: CallbackQuery, state: FSMContext):
 @router.message(GiftEditState.waiting_for_gift_info)
 async def handle_gift_info_input(message: Message, state: FSMContext):
     try:
-        data = await state.get_data()
-        case_id = data['case_id']
-        gift_id = data['gift_id']
         lines = message.text.split('\n')
 
         if len(lines) < 4:
@@ -413,6 +410,8 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
         gift_id = data['gift_id']
         name = data['gift_name']
         chance = data['gift_chance']
+        fake_chance = data["gift_fake_chance"]
+        price = data["gift_price"]
         new_url = message.text.strip() if message.text.strip().lower() != 'пропустить' else None
         cases = load_cases()
         case = next((c for c in cases if c["id"] == case_id), None)
@@ -421,6 +420,8 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
             if gift:
                 gift['name'] = name
                 gift['chance'] = chance
+                gift["price"] = price
+                gift["fake_chance"] = fake_chance
                 if new_url:
                     gift['link'] = new_url
                     # Запускаем создание иконки в фоне
