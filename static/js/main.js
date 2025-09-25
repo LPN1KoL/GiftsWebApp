@@ -182,12 +182,13 @@ function showWinModal(gift) {
     `;
 
     if (gift) {
-        modal.querySelector('.img img').src = gift.image;
 
         if (gift.price){
             modal.querySelector('.cnt').textContent = gift.price;
             document.getElementById('sell_btn').onclick = () => sell_gift(gift.id);
+            modal.querySelector('.img img').src = gift.image;
         } else {
+            modal.querySelector('.img img').src = '/media/failed.png';
             modal.querySelector('.holder').innerHTML = '<h2 style="color: white;" class="cnt">Повезёт в другой раз</h2>';
             document.getElementById('sell_btn').style.display = "none";
         }

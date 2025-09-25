@@ -88,16 +88,14 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
         selected_gift = case["gifts"][-1]
     new_balance = balance - price
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
-    image = '/media/failed.png'
     if selected_gift.get("price", 0) != 0:
         gifts_list.append(selected_gift["id"])
-        image = selected_gift["img"]
     await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
     return {
         "gift": {
             "id": selected_gift["id"],
             "name": selected_gift["name"],
-            "image": image,
+            "image": selected_gift["img"],
             "price": selected_gift.get("price", 0)
         }
     }
