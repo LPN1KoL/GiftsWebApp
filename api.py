@@ -173,9 +173,12 @@ async def check_subscription(user_id: int, channel_id: int):
 
 def send_to_user(user_id):
     send_message_url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
+    message_text = (
+        "Напишите количество звезд, которое хотите оплатить"
+    )
     requests.post(send_message_url, json={
         "chat_id": user_id,
-        "text": "Напишите количество звезд, которое хотите оплатить"
+        "text": message_text
     }, timeout=10)
 
 

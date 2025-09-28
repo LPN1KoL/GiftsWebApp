@@ -452,6 +452,7 @@ async def handle_donate(request):
     try:
         data = await request.json()
         user_id = data.get("user_id")
+        print(user_id)
         await send_notif_to_user(user_id)
         return JSONResponse(status_code=200, content={"success": True})
     except:
