@@ -20,7 +20,7 @@ async function plus_func(){
 
     try {
         tg.close();
-        await sendApiRequest("/api/donate", { user_id });
+        await sendApiRequest("/api/donate", { user_id: user_id });
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }
@@ -50,7 +50,7 @@ async function updateProfile() {
             alert("Ошибка: Не удалось определить Telegram ID");
             return;
         }
-        const result = await sendApiRequest('/api/get_profile', { user_id });
+        const result = await sendApiRequest('/api/get_profile', { user_id: user_id });
         
         // Обновляем баланс
         const balanceElement = document.getElementById('balance_display');
