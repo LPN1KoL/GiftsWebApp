@@ -163,6 +163,7 @@ def check_subscription_sync(user_id: int, channel_id: int):
     except:
         return False
 
+
 async def check_subscription(user_id: int, channel_id: int):
     """
     Асинхронная обертка для упрощенной версии

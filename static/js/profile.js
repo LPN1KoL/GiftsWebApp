@@ -19,8 +19,8 @@ async function plus_func(){
     }
 
     try {
-        tg.close();
         await sendApiRequest("/api/donate", { user_id });
+        tg.close();
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }
