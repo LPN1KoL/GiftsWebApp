@@ -448,7 +448,7 @@ async def handle_404():
 
 
 @app.post("/api/donate")
-async def handle_donate(request):
+async def handle_donate(request: Request):
     try:
         data = await request.json()
         user_id = data.get("user_id")
