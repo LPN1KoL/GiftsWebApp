@@ -447,6 +447,17 @@ async def handle_404():
     return JSONResponse(status_code=200, content={"error": "Page not found"})
 
 
+@app.post("/api/donate")
+async def handle_donate(request):
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        await send_notif_to_user(user_id)
+        return JSONResponse(status_code=200, content={"success": True})
+    except:
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+
 # --- Запуск ---
 async def run_server():
     ssl_cert = f"/etc/letsencrypt/live/{os.getenv('DOMAIN')}/fullchain.pem"

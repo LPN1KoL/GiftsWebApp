@@ -6,7 +6,7 @@ if (!tg.initDataUnsafe?.user?.id) {
     window.location.href = "/404";
 }
 
-function plus_func(){
+async function plus_func(){
     if (!tg) {
         alert("WebApp не инициализирован");
         return;
@@ -19,8 +19,8 @@ function plus_func(){
     }
 
     try {
-        tg.sendData(JSON.stringify({action: "donate",}));
         tg.close();
+        await sendApiRequest("/api/donate", { user_id });
     } catch (err) {
         alert("Ошибка при отправке: " + err.message);
     }

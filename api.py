@@ -51,6 +51,7 @@ def send_notification_to_admin_sync(user_id: int, data):
         print("Failed to send notification to admin")
         pass
 
+
 async def send_notification_to_admin(user_id: int, data):
     """
     Асинхронная обертка для синхронной функции
@@ -167,3 +168,15 @@ async def check_subscription(user_id: int, channel_id: int):
     Асинхронная обертка для упрощенной версии
     """
     return await asyncio.to_thread(check_subscription_sync, user_id, channel_id)
+
+
+def send_to_user(user_id):
+    send_message_url = f"https://api.telegram.org/bot{API_TOKEN}/sendMessage"
+    requests.post(send_message_url, json={
+        "chat_id": user_id,
+        "text": "Напишите количество звезд, которое хотите оплатить"
+    }, timeout=10)
+
+
+async def send_notif_to_user(user_id):
+    await asyncio.to_thread(send_to_user, user_id)
