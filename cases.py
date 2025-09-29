@@ -33,9 +33,9 @@ async def create_gift_icon(gift, screenshot_func):
                 screenshot_func,
                 gift['link'], 
                 output_path,
-                crop_x=527,
-                crop_y=120,
-                crop_size=255
+                crop_x=868,
+                crop_y=98,
+                crop_size=202
             )
             t = threading.Thread(target=screenshot_func, args=(gift['link'], output_path, 527, 120, 255))
             t.start()

@@ -7,7 +7,7 @@ import os
 from rembg import remove
 import io
 
-def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=527, crop_y=120, crop_size=255):
+def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=868, crop_y=98, crop_size=202):
     # Настройки Chrome
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -81,8 +81,8 @@ if __name__ == "__main__":
     url = sys.argv[1]
     output_file = sys.argv[2] if len(sys.argv) > 2 else "processed_screenshot.png"
     
-    crop_x = 527
-    crop_y = 120
-    crop_size = 255
+    crop_x = 868
+    crop_y = 98
+    crop_size = 202
     
     take_screenshot_and_process(url, output_file, crop_x, crop_y, crop_size)
