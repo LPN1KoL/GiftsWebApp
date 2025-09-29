@@ -13,7 +13,7 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=640,360")
+    chrome_options.add_argument("--window-size=1920,1080")
     
     try:
         # Запускаем браузер
@@ -65,8 +65,11 @@ def remove_background(image):
     image.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
     
-    # Удаляем фон
-    result_bytes = remove(img_byte_arr)
+    # Удаляем фон с другой моделью
+    result_bytes = remove(
+        img_byte_arr,
+        session=rembg.new_session("u2net")  # или "u2netp", "u2net_human_seg"
+    )
     
     # Конвертируем обратно в PIL Image
     result_image = Image.open(io.BytesIO(result_bytes))
