@@ -195,16 +195,29 @@ async def handle_case_edit(callback: CallbackQuery):
     )
 
 
+
+
+
 @router.callback_query(F.data.startswith("case_publish_"))
 async def handle_case_publish(callback: CallbackQuery):
     case_id = callback.data.split("_")[2]
-    result = publish_case(case_id)
-    if "error" in result:
-        await callback.answer(result["error"], show_alert=True)
-    else:
-        await callback.answer("✅ Кейс опубликован")
-        # обновляем экран, чтобы статус изменился
-        await handle_case_edit(callback)
+    cases = load_cases()
+    case = next((c for c in cases if c["id"] == case_id), None)
+
+    if not case:
+        await callback.answer("❌ Кейс не найден", show_alert=True)
+        return
+
+    if case.get("published", False):
+        await callback.answer("⚠️ Кейс уже опубликован", show_alert=True)
+        return
+
+    case["published"] = True  # 👈 публикуем
+    save_cases(cases)
+
+    await callback.answer("✅ Кейс опубликован")
+    await handle_case_edit(callback)
+
 
 
 @router.callback_query(F.data.startswith("case_info_"))
@@ -303,7 +316,8 @@ async def handle_case_create(callback: CallbackQuery):
         "name": f"Новый кейс {len(cases) + 1}",
         "price": 100,
         "logo": "/media/default.png",
-        "gifts": []
+        "gifts": [],
+        "published": False
     }
     cases.append(new_case)
     save_cases(cases)
