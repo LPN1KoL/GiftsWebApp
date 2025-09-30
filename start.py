@@ -45,10 +45,13 @@ async def load_cases_data():
     try:
         with open("data/cases.json", "r", encoding="utf-8") as f:
             cases = json.load(f)
-            
-            # Фильтруем только нужные поля
+
+            # Фильтруем только опубликованные кейсы
             filtered_cases = []
             for case in cases:
+                if not case.get("published", False):
+                    continue  # пропускаем неопубликованные
+                
                 filtered_case = {
                     "id": case.get("id"),
                     "name": case.get("name"),
@@ -57,12 +60,13 @@ async def load_cases_data():
                     "category": case.get("category")
                 }
                 filtered_cases.append(filtered_case)
-            
+
             return filtered_cases
-            
+
     except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Ошибка загрузки cases.json: {e}")
         return []
+
     
 
 async def get_case_complete_data(case_id, random_length=32):

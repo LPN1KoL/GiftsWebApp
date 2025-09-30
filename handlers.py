@@ -173,19 +173,39 @@ async def handle_case_edit(callback: CallbackQuery):
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
+
+    # Определяем текст для кнопки (если уже опубликован — пишем, что опубликован)
+    publish_btn_text = "📢 Опубликовать кейс" if not case.get("published", False) else "✅ Кейс опубликован"
+
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="✏️ Редактировать информацию", callback_data=f"case_info_{case_id}")],
         [InlineKeyboardButton(text="🎁 Управление подарками", callback_data=f"case_gifts_{case_id}")],
+        [InlineKeyboardButton(text=publish_btn_text, callback_data=f"case_publish_{case_id}")],
         [InlineKeyboardButton(text="🗑️ Удалить кейс", callback_data=f"case_delete_{case_id}")],
         [InlineKeyboardButton(text="◀️ Назад", callback_data="case_list")]
     ])
+
     await callback.message.edit_text(
         f"📦 Кейс: {case['name']}\n"
         f"💰 Цена: {case['price']}₽\n"
         f"🎁 Подарков: {len(case['gifts'])}\n"
-        f"📂 Категория: {case.get('category', 'Не указана')}",
+        f"📂 Категория: {case.get('category', 'Не указана')}\n"
+        f"📢 Статус: {'✅ Опубликован' if case.get('published', False) else '❌ Не опубликован'}",
         reply_markup=keyboard
     )
+
+
+@router.callback_query(F.data.startswith("case_publish_"))
+async def handle_case_publish(callback: CallbackQuery):
+    case_id = callback.data.split("_")[2]
+    result = publish_case(case_id)
+    if "error" in result:
+        await callback.answer(result["error"], show_alert=True)
+    else:
+        await callback.answer("✅ Кейс опубликован")
+        # обновляем экран, чтобы статус изменился
+        await handle_case_edit(callback)
+
 
 @router.callback_query(F.data.startswith("case_info_"))
 async def handle_case_info(callback: CallbackQuery, state: FSMContext):
