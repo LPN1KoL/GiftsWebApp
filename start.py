@@ -260,21 +260,20 @@ async def get_media_file(filename):
     except:
         # Если файл не найден
         raise HTTPException(status_code=404, detail="File not found")
+    
+
+@app.get("/static/{filename}")
+async def get_static_file(filename):
+    try:
+        return FileResponse(os.path.join('/satic', filename))
+    except:
+        # Если файл не найден
+        raise HTTPException(status_code=404, detail="File not found")
 
 
 @app.get("/favicon.ico")
 async def get_favicon():
     return HTTPException(status_code=404, detail="Not found")
-
-
-@app.get("/{filename}")
-async def serve_static_files(filename: str):
-    static_path = os.path.join("static", filename)
-    if os.path.isfile(static_path):
-        return FileResponse(static_path)
-
-    # Если файл не найден
-    raise HTTPException(status_code=404, detail="File not found")
 
 
 #--- API эндпоинты ---

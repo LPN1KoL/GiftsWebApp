@@ -24,7 +24,7 @@ if (localStorage.getItem('case_id')) {
 }
 
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-if (!user_id) {
+if (!window.Telegram?.WebApp.initDataUnsafe?.user?.id) {
     window.location.href = "/404";
 }
 
