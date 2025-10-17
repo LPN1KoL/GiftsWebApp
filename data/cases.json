@@ -8,12 +8,21 @@
     "gifts": [
       {
         "id": "gift-1-2664",
-        "name": "Пепе ALL IN",
+        "name": "Plush Pepe",
         "link": "https://t.me/nft/PlushPepe-2624",
         "img": "/media/gifts/gift-1-2664.png",
         "chance": 0.0,
         "fake_chance": 0.1,
         "price": 689000
+      },
+      {
+        "id": "gift-2-7290",
+        "name": "0",
+        "link": "https://example.com/gift",
+        "img": "/media/gift.png",
+        "chance": 1.0,
+        "fake_chance": 0.9,
+        "price": 0
       }
     ],
     "published": true
@@ -21,10 +30,231 @@
   {
     "id": "case-2",
     "category": "basic",
-    "name": "Новый кейс 2",
-    "price": 100,
+    "name": "CandyCane case",
+    "price": 15,
     "logo": "/media/default.png",
-    "gifts": [],
-    "published": false
+    "gifts": [
+      {
+        "id": "gift-1-4251",
+        "name": "CandyCane",
+        "link": "https://t.me/nft/CandyCane-93844",
+        "img": "/media/gifts/gift-1-4251.png",
+        "chance": 0.0,
+        "fake_chance": 0.51,
+        "price": 850
+      },
+      {
+        "id": "gift-2-7728",
+        "name": "0",
+        "link": "https://example.com/gift",
+        "img": "/media/gift.png",
+        "chance": 1.0,
+        "fake_chance": 0.49,
+        "price": 0
+      }
+    ],
+    "published": true
+  },
+  {
+    "id": "case-3",
+    "category": "basic",
+    "name": "Кейс 3",
+    "price": 150,
+    "logo": "/media/gift.png",
+    "gifts": [
+      {
+        "id": "gift-1-2188",
+        "name": "BDayCandle",
+        "link": "https://t.me/nft/BDayCandle-36898",
+        "img": "/media/gifts/gift-1-2188.png",
+        "chance": 0.0143,
+        "fake_chance": 0.0143,
+        "price": 450
+      },
+      {
+        "id": "gift-2-1564",
+        "name": "BDayCandle",
+        "link": "https://t.me/nft/BDayCandle-36898",
+        "img": "/media/gifts/gift-2-1564.png",
+        "chance": 0.012,
+        "fake_chance": 0.012,
+        "price": 600
+      },
+      {
+        "id": "gift-3-1960",
+        "name": "LolPop",
+        "link": "https://t.me/nft/LolPop-257427",
+        "img": "/media/gifts/gift-3-1960.png",
+        "chance": 0.0071,
+        "fake_chance": 0.0071,
+        "price": 650
+      },
+      {
+        "id": "gift-4-7619",
+        "name": "LunarSnake",
+        "link": "https://t.me/nft/LunarSnake-123980",
+        "img": "/media/gifts/gift-4-7619.png",
+        "chance": 0.0069,
+        "fake_chance": 0.0069,
+        "price": 650
+      }
+    ],
+    "published": true
+  },
+  {
+    "id": "case-4",
+    "category": "allin",
+    "name": "Man ALL IN",
+    "price": 729,
+    "logo": "/media/default.png",
+    "gifts": [
+      {
+        "id": "gift-1-3437",
+        "name": "VintageCigar",
+        "link": "https://t.me/nft/VintageCigar-23627",
+        "img": "/media/gifts/gift-1-3437.png",
+        "chance": 0.0,
+        "fake_chance": 0.1,
+        "price": 9000
+      },
+      {
+        "id": "gift-2-6626",
+        "name": "SwissWatch",
+        "link": "https://t.me/nft/SwissWatch-17061",
+        "img": "/media/gifts/gift-2-6626.png",
+        "chance": 0.0,
+        "fake_chance": 0.05,
+        "price": 10500
+      }
+    ],
+    "published": true
+  },
+  {
+    "id": "case-5",
+    "category": "allin",
+    "name": "Ring ALL IN",
+    "price": 2997,
+    "logo": "/media/gifts/gift-1-7944.png",
+    "gifts": [
+      {
+        "id": "gift-1-7944",
+        "name": "BondedRing",
+        "link": "https://t.me/nft/BondedRing-4471",
+        "img": "/media/gifts/gift-1-7944.png",
+        "chance": 0.0,
+        "fake_chance": 0.05,
+        "price": 12000
+      },
+      {
+        "id": "gift-2-4268",
+        "name": "GemSignet",
+        "link": "https://t.me/nft/GemSignet-1152",
+        "img": "/media/gifts/gift-2-4268.png",
+        "chance": 0.0,
+        "fake_chance": 0.04,
+        "price": 22000
+      },
+      {
+        "id": "gift-3-7113",
+        "name": "SignetRing",
+        "link": "https://t.me/nft/SignetRing-14188",
+        "img": "/media/gifts/gift-3-7113.png",
+        "chance": 0.0,
+        "fake_chance": 0.03,
+        "price": 9000
+      },
+      {
+        "id": "gift-4-1975",
+        "name": "DiamondRing",
+        "link": "https://t.me/nft/DiamondRing-25415",
+        "img": "/media/gifts/gift-4-1975.png",
+        "chance": 0.0,
+        "fake_chance": 0.09,
+        "price": 5000
+      },
+      {
+        "id": "gift-5-6707",
+        "name": "NailBracelet",
+        "link": "https://t.me/nft/NailBracelet-1528",
+        "img": "/media/gifts/gift-5-6707.png",
+        "chance": 0.0,
+        "fake_chance": 0.01,
+        "price": 43000
+      }
+    ],
+    "published": true
+  },
+  {
+    "id": "case-6",
+    "category": "allin",
+    "name": "Loot Bag ALL IN",
+    "price": 1292,
+    "logo": "/media/gifts/gift-1-7294.png",
+    "gifts": [
+      {
+        "id": "gift-1-7294",
+        "name": "Звёзды",
+        "link": "star",
+        "img": "/media/gifts/gift-1-7294.png",
+        "chance": 0.039,
+        "fake_chance": 0.039,
+        "price": 2000
+      },
+      {
+        "id": "gift-2-2148",
+        "name": "Loot Bag",
+        "link": "https://t.me/nft/LootBag-5380",
+        "img": "/media/gifts/gift-2-2148.png",
+        "chance": 0.1,
+        "fake_chance": 0.0,
+        "price": 2800
+      },
+      {
+        "id": "gift-3-2550",
+        "name": "Звёзды",
+        "link": "star",
+        "img": "/media/gifts/gift-3-2550.png",
+        "chance": 0.039,
+        "fake_chance": 0.039,
+        "price": 3500
+      },
+      {
+        "id": "gift-6-4768",
+        "name": "Сердце",
+        "link": "heart",
+        "img": "/media/gifts/gift-6-4768.png",
+        "chance": 0.1588,
+        "fake_chance": 0.1588,
+        "price": 15
+      },
+      {
+        "id": "gift-7-8053",
+        "name": "Медведь",
+        "link": "bear",
+        "img": "/media/gifts/gift-7-8053.png",
+        "chance": 0.1588,
+        "fake_chance": 0.1588,
+        "price": 15
+      },
+      {
+        "id": "gift-8-5451",
+        "name": "Кольцо",
+        "link": "ring",
+        "img": "/media/gifts/gift-8-5451.png",
+        "chance": 0.32,
+        "fake_chance": 0.32,
+        "price": 100
+      },
+      {
+        "id": "gift-9-1734",
+        "name": "Алмаз",
+        "link": "diamond",
+        "img": "/media/gifts/gift-9-1734.png",
+        "chance": 0.32,
+        "fake_chance": 0.32,
+        "price": 100
+      }
+    ],
+    "published": true
   }
 ]

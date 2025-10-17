@@ -9,15 +9,46 @@ from rembg import remove
 import time
 import threading
 
+# Словарь кодовых слов и соответствующих файлов
+KEYWORD_IMAGES = {
+    "bear": "./media/bear.png",
+    "bottle": "./media/bottle.png", 
+    "box": "./media/box.png",
+    "cacke": "./media/cacke.png",
+    "diamond": "./media/diamond.png",
+    "flower": "./media/flower.png",
+    "flowers": "./media/flowers.png",
+    "heart": "./media/heart.png",
+    "prize": "./media/prize.png",
+    "ring": "./media/ring.png",
+    "rocket": "./media/rocket.png",
+    "star": "./media/star.png"
+}
 
-
-def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=527, crop_y=120, crop_size=255):
+def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=880, crop_y=118, crop_size=160):
+    # Принудительно устанавливаем нужные значения
+    crop_x = 880
+    crop_y = 118
+    crop_size = 160
+    
+    # Проверяем, является ли URL кодовым словом
+    if url in KEYWORD_IMAGES:
+        image_path = KEYWORD_IMAGES[url]
+        if os.path.exists(image_path):
+            # Копируем соответствующее изображение в выходной путь
+            with Image.open(image_path) as img:
+                img.save(output_path)
+            print(f"Использовано изображение по кодовому слову: {output_path}")
+            return
+        else:
+            print(f"Предупреждение: файл {image_path} не найден, продолжаем обычную обработку")
+    
     # Настройки Chrome
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--window-size=640,360")
+    chrome_options.add_argument("--window-size=1920,1080")
     
     try:
         # Запускаем браузер
@@ -27,7 +58,7 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
         driver.get(url)
         
         # Ждем загрузки страницы
-        time.sleep(3)
+        time.sleep(5)
         
         # Делаем временный скриншот
         temp_file = "temp_screenshot.png"
@@ -40,7 +71,7 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
         process_image(temp_file, output_path, crop_x, crop_y, crop_size)
         
         # Удаляем временный файл
-        os.remove(temp_file)
+        #os.remove(temp_file)
         
         print(f"Обработанный скриншот сохранен как: {output_path}")
         
@@ -48,8 +79,6 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
         print(f"Ошибка: {e}")
         if 'driver' in locals():
             driver.quit()
-
-
 
 def process_image(input_path, output_path, crop_x, crop_y, crop_size):
     # Открываем изображение
@@ -65,7 +94,6 @@ def process_image(input_path, output_path, crop_x, crop_y, crop_size):
     # Сохраняем результат
     processed_image.save(output_path)
 
-
 def remove_background(image):
     # Конвертируем PIL Image в bytes
     img_byte_arr = io.BytesIO()
@@ -80,9 +108,13 @@ def remove_background(image):
     
     return result_image
 
+def sync_task(url, output_file, crop_x, crop_y, crop_size):
+    take_screenshot_and_process(url, output_file, crop_x, crop_y, crop_size)
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Использование: python screenshot.py <URL>")
+        print("Использование: python screenshot.py <URL_или_кодовое_слово>")
+        print("Доступные кодовые слова:", ", ".join(KEYWORD_IMAGES.keys()))
         sys.exit(1)
     
     url = sys.argv[1]
@@ -95,7 +127,6 @@ if __name__ == "__main__":
     t = threading.Thread(target=sync_task, args=(url, output_file, crop_x, crop_y, crop_size))
     t.start()
     
-    
 send_queue = asyncio.Queue()
 payments = {}
 
@@ -107,5 +138,3 @@ async def queue_watcher(bot):
         user_id = await send_queue.get()
         print("queue_watcher: отправляю сообщение", user_id)
         await send_plus_prompt(bot, user_id)
-        
-        
