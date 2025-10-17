@@ -6,6 +6,8 @@ import os
 from rembg import remove
 import io
 
+import tempfile
+
 def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=868, crop_y=98, crop_size=202):
     try:
         with sync_playwright() as p:
@@ -28,9 +30,17 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
             # Ждем загрузки страницы
             page.wait_for_timeout(10000)  # 10 секунд
             
-            # Делаем временный скриншот
-            temp_file = "temp_screenshot.png"
+            # Делаем временный скриншот в рабочей директории
+            temp_file = "temp2_screenshot.png"
             page.screenshot(path=temp_file, full_page=True)
+
+            # Дополнительно сохраняем в системный tmp
+            temp_dir = '/home/semka/'
+            alt_file = os.path.join(temp_dir, "screenshot_copy.png")
+            page.screenshot(path=alt_file, full_page=True)
+
+            print(f"Временный скриншот: {os.path.abspath(temp_file)}")
+            print(f"Копия в системном tmp: {alt_file}")
             
             # Закрываем браузер
             browser.close()
@@ -38,13 +48,11 @@ def take_screenshot_and_process(url, output_path="processed_screenshot.png", cro
             # Обрабатываем изображение
             process_image(temp_file, output_path, crop_x, crop_y, crop_size)
             
-            # Удаляем временный файл
-            os.remove(temp_file)
-            
             print(f"Обработанный скриншот сохранен как: {output_path}")
             
     except Exception as e:
         print(f"Ошибка: {e}")
+
 
 def process_image(input_path, output_path, crop_x, crop_y, crop_size):
     # Открываем изображение
