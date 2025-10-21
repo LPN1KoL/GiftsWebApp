@@ -25,6 +25,13 @@ KEYWORD_IMAGES = {
     "star": "./media/star.png"
 }
 
+def remove_background(image: Image.Image) -> Image.Image:
+    img_bytes = io.BytesIO()
+    image.save(img_bytes, format="PNG")
+    result_bytes = remove(img_bytes.getvalue())
+    result_image = Image.open(io.BytesIO(result_bytes)).convert("RGBA")
+    return result_image
+
 def take_screenshot_and_process(url, output_path="processed_screenshot.png", crop_x=880, crop_y=118, crop_size=160):
     # Принудительно устанавливаем нужные значения
     crop_x = 880

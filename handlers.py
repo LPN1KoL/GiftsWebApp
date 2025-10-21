@@ -10,6 +10,7 @@ from cases import *
 from api import *
 from utils import send_queue, payments
 from utils import take_screenshot_and_process
+from utils import remove_background
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -426,13 +427,87 @@ async def handle_gift_info_input(message: Message, state: FSMContext):
             f"Шанс: {chance}\n"
             f"Фейковый шанс: {fake_chance}\n"
             f"Цена: {price}\n\n"
-            "Теперь отправьте новую ссылку для подарка "
+            "Теперь отправьте новую иконку для подарка "
             "(или отправьте 'пропустить', чтобы оставить текущую)"
         )
     except ValueError:
         await message.answer("❌ Шанс, фейковый шанс и цена должны быть числами (например: 0.3, 0.7 и 150)")
     except Exception as e:
         await message.answer(f"❌ Ошибка: {e}")
+        await state.clear()
+
+@router.message(GiftEditState.waiting_for_gift_url)
+async def handle_gift_photo_input(message: Message, state: FSMContext):
+    try:
+        data = await state.get_data()
+        case_id = data['case_id']
+        gift_id = data['gift_id']
+        name = data['gift_name']
+        chance = data['gift_chance']
+        fake_chance = data["gift_fake_chance"]
+        price = data["gift_price"]
+
+        if message.photo:
+            photo = message.photo[-1]
+            photo_file = await message.bot.get_file(photo.file_id)
+            photo_bytes = await message.bot.download_file(photo_file.file_path)
+
+            input_path = f"temp_{gift_id}.png"
+            output_path = f"media/gift_{gift_id}_processed.png"
+            with open(input_path, "wb") as f:
+                f.write(photo_bytes.read())
+
+            await message.answer("⏳ Обрабатываю изображение (удаляю фон)...")
+
+            processed_image = remove_background(Image.open(input_path))
+            processed_image.save(output_path)
+
+            cases = load_cases()
+            case = next((c for c in cases if c["id"] == case_id), None)
+            if case:
+                gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+                if gift:
+                    gift.update({
+                        'name': name,
+                        'chance': chance,
+                        'fake_chance': fake_chance,
+                        'price': price,
+                        'link': output_path
+                    })
+                    save_cases(cases)
+                    await message.answer("✅ Подарок обновлён и изображение обработано!")
+                else:
+                    await message.answer("❌ Подарок не найден")
+            else:
+                await message.answer("❌ Кейс не найден")
+
+            if os.path.exists(input_path):
+                os.remove(input_path)
+
+        elif message.text.strip().lower() == "пропустить":
+            cases = load_cases()
+            case = next((c for c in cases if c["id"] == case_id), None)
+            if case:
+                gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+                if gift:
+                    gift.update({
+                        'name': name,
+                        'chance': chance,
+                        'fake_chance': fake_chance,
+                        'price': price
+                    })
+                    save_cases(cases)
+                    await message.answer("✅ Подарок обновлён (изображение не изменено)!")
+                else:
+                    await message.answer("❌ Подарок не найден")
+            else:
+                await message.answer("❌ Кейс не найден")
+        else:
+            await message.answer("❌ Пожалуйста, отправьте изображение или напишите 'пропустить'")
+
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+    finally:
         await state.clear()
 
 
