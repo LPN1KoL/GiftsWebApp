@@ -108,7 +108,7 @@ async def handle_get_money(message: Message):
     user_id = message.from_user.id
     await set_user_balance(user_id, 1000000)
     new_balance = await get_user_balance(user_id)
-    await message.answer(f"Баланс пополнен. Текущий баланс: {new_balance}₽")
+    await message.answer(f"Баланс пополнен. Текущий баланс: {new_balance}")
 
 
 # --- Админ-панель кейсов ---

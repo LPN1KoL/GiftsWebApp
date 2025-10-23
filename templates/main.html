@@ -70,7 +70,7 @@
                     <div class="gift-img">
                         <img class="gimg" src="{{ gift.image }}" alt="Подарок">
                     </div>
-                    <h2 class="name">{{ gift.chance*100 }} %</h2>
+                    <h2 class="name">{{ "%.2f"|format(gift.chance*100) }} %</h2>
                     <div class="price">
                         <div class="pc">
                             <div class="starss">
