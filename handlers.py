@@ -447,63 +447,75 @@ async def handle_gift_photo_input(message: Message, state: FSMContext):
         fake_chance = data["gift_fake_chance"]
         price = data["gift_price"]
 
+        # Определяем путь к иконке в зависимости от цены
+        if price == 0:
+            icon_path = "media/failed.png"
+        else:
+            icon_path = None
+
         if message.photo:
-            photo = message.photo[-1]
-            photo_file = await message.bot.get_file(photo.file_id)
-            photo_bytes = await message.bot.download_file(photo_file.file_path)
+            # Если цена не 0, обрабатываем фото как обычно
+            if price != 0:
+                photo = message.photo[-1]
+                photo_file = await message.bot.get_file(photo.file_id)
+                photo_bytes = await message.bot.download_file(photo_file.file_path)
 
-            input_path = f"temp_{gift_id}.png"
-            output_path = f"media/gift_{gift_id}_processed.png"
-            with open(input_path, "wb") as f:
-                f.write(photo_bytes.read())
+                input_path = f"temp_{gift_id}.png"
+                output_path = f"media/gifts/{gift_id}.png"
+                with open(input_path, "wb") as f:
+                    f.write(photo_bytes.read())
 
-            await message.answer("⏳ Обрабатываю изображение (удаляю фон)...")
+                await message.answer("⏳ Обрабатываю изображение (удаляю фон)...")
 
-            processed_image = remove_background(Image.open(input_path))
-            processed_image.save(output_path)
+                processed_image = remove_background(Image.open(input_path))
+                processed_image.save(output_path)
+                icon_path = output_path
 
-            cases = load_cases()
-            case = next((c for c in cases if c["id"] == case_id), None)
-            if case:
-                gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
-                if gift:
-                    gift.update({
-                        'name': name,
-                        'chance': chance,
-                        'fake_chance': fake_chance,
-                        'price': price,
-                        'link': output_path
-                    })
-                    save_cases(cases)
-                    await message.answer("✅ Подарок обновлён и изображение обработано!")
-                else:
-                    await message.answer("❌ Подарок не найден")
+                if os.path.exists(input_path):
+                    os.remove(input_path)
             else:
-                await message.answer("❌ Кейс не найден")
-
-            if os.path.exists(input_path):
-                os.remove(input_path)
+                # Если цена 0, игнорируем фото и используем failed.png
+                await message.answer("⚠️ Цена подарка 0, используется иконка failed.png (фото проигнорировано)")
 
         elif message.text.strip().lower() == "пропустить":
-            cases = load_cases()
-            case = next((c for c in cases if c["id"] == case_id), None)
-            if case:
-                gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
-                if gift:
-                    gift.update({
-                        'name': name,
-                        'chance': chance,
-                        'fake_chance': fake_chance,
-                        'price': price
-                    })
-                    save_cases(cases)
-                    await message.answer("✅ Подарок обновлён (изображение не изменено)!")
-                else:
-                    await message.answer("❌ Подарок не найден")
-            else:
-                await message.answer("❌ Кейс не найден")
+            # При пропуске, если цена 0, устанавливаем failed.png
+            if price == 0:
+                icon_path = "media/failed.png"
+                await message.answer("⚠️ Цена подарка 0, используется иконка failed.png")
+            # Если цена не 0, оставляем текущую иконку (icon_path останется None)
+
         else:
             await message.answer("❌ Пожалуйста, отправьте изображение или напишите 'пропустить'")
+            return
+
+        # Обновляем данные подарка
+        cases = load_cases()
+        case = next((c for c in cases if c["id"] == case_id), None)
+        if case:
+            gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+            if gift:
+                update_data = {
+                    'name': name,
+                    'chance': chance,
+                    'fake_chance': fake_chance,
+                    'price': price
+                }
+                # Обновляем иконку только если она была определена
+                if icon_path is not None:
+                    update_data['img'] = icon_path
+                
+                gift.update(update_data)
+                await update_case_icon(case)
+                save_cases(cases)
+                
+                if price == 0:
+                    await message.answer("✅ Подарок обновлён! Использована иконка failed.png (цена 0)")
+                else:
+                    await message.answer("✅ Подарок обновлён!")
+            else:
+                await message.answer("❌ Подарок не найден")
+        else:
+            await message.answer("❌ Кейс не найден")
 
     except Exception as e:
         await message.answer(f"❌ Ошибка: {e}")

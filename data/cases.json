@@ -18,8 +18,8 @@
       {
         "id": "gift-2-7290",
         "name": "0",
-        "link": "https://example.com/gift",
-        "img": "/media/gift.png",
+        "link": "media/failed.png",
+        "img": "media/failed.png",
         "chance": 1.0,
         "fake_chance": 0.9,
         "price": 0
@@ -32,7 +32,7 @@
     "category": "basic",
     "name": "CandyCane case",
     "price": 15,
-    "logo": "/media/default.png",
+    "logo": "/media/gifts/gift-1-4251.png",
     "gifts": [
       {
         "id": "gift-1-4251",
@@ -47,7 +47,7 @@
         "id": "gift-2-7728",
         "name": "0",
         "link": "https://example.com/gift",
-        "img": "/media/gift.png",
+        "img": "media/failed.png",
         "chance": 1.0,
         "fake_chance": 0.49,
         "price": 0
@@ -60,7 +60,7 @@
     "category": "basic",
     "name": "Кейс 3",
     "price": 150,
-    "logo": "/media/gift.png",
+    "logo": "/media/gifts/gift-3-1960.png",
     "gifts": [
       {
         "id": "gift-1-2188",
@@ -92,11 +92,20 @@
       {
         "id": "gift-4-7619",
         "name": "LunarSnake",
-        "link": "https://t.me/nft/LunarSnake-123980",
+        "link": "media/gifts/gift-4-7619.png",
         "img": "/media/gifts/gift-4-7619.png",
         "chance": 0.0069,
         "fake_chance": 0.0069,
         "price": 650
+      },
+      {
+        "id": "gift-5-6474",
+        "name": "0",
+        "link": "https://example.com/gift",
+        "img": "media/failed.png",
+        "chance": 0.9668,
+        "fake_chance": 0.1,
+        "price": 0
       }
     ],
     "published": true
@@ -106,7 +115,7 @@
     "category": "allin",
     "name": "Man ALL IN",
     "price": 729,
-    "logo": "/media/default.png",
+    "logo": "media/gifts/gift-2-6626.png",
     "gifts": [
       {
         "id": "gift-1-3437",
@@ -120,11 +129,20 @@
       {
         "id": "gift-2-6626",
         "name": "SwissWatch",
-        "link": "https://t.me/nft/SwissWatch-17061",
-        "img": "/media/gifts/gift-2-6626.png",
+        "link": "media/gifts/gift-2-6626.png",
+        "img": "media/gifts/gift-2-6626.png",
         "chance": 0.0,
         "fake_chance": 0.05,
         "price": 10500
+      },
+      {
+        "id": "gift-3-9863",
+        "name": "0",
+        "link": "https://example.com/gift",
+        "img": "media/failed.png",
+        "chance": 1.0,
+        "fake_chance": 0.1,
+        "price": 0
       }
     ],
     "published": true
@@ -134,7 +152,7 @@
     "category": "allin",
     "name": "Ring ALL IN",
     "price": 2997,
-    "logo": "/media/gifts/gift-1-7944.png",
+    "logo": "/media/gifts/gift-5-6707.png",
     "gifts": [
       {
         "id": "gift-1-7944",
@@ -180,6 +198,15 @@
         "chance": 0.0,
         "fake_chance": 0.01,
         "price": 43000
+      },
+      {
+        "id": "gift-6-7971",
+        "name": "0",
+        "link": "https://example.com/gift",
+        "img": "media/failed.png",
+        "chance": 1.0,
+        "fake_chance": 0.1,
+        "price": 0
       }
     ],
     "published": true
@@ -203,10 +230,10 @@
       {
         "id": "gift-2-2148",
         "name": "Loot Bag",
-        "link": "https://t.me/nft/LootBag-5380",
+        "link": "media/gifts/gift-2-2148.png",
         "img": "/media/gifts/gift-2-2148.png",
-        "chance": 0.1,
-        "fake_chance": 0.0,
+        "chance": 0.0,
+        "fake_chance": 0.1,
         "price": 2800
       },
       {

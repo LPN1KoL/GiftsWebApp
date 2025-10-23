@@ -19,10 +19,11 @@ def save_cases(cases):
 async def update_case_icon(case):
     if not case['gifts']:
         return
-    rarest_gift = min(case['gifts'], key=lambda x: x['chance'])
-    if rarest_gift.get('img'):
-        case['logo'] = rarest_gift['img']
-        print(f"✅ Иконка кейса {case['id']} обновлена: {rarest_gift['img']}")
+    # Меняем min на max и ключ с 'chance' на 'price'
+    most_expensive_gift = max(case['gifts'], key=lambda x: x.get('price', 0))
+    if most_expensive_gift.get('img'):
+        case['logo'] = most_expensive_gift['img']
+        print(f"✅ Иконка кейса {case['id']} обновлена на основе самого дорогого подарка: {most_expensive_gift['name']} (цена: {most_expensive_gift.get('price', 0)})")
 
 async def create_gift_icon(gift, screenshot_func):
     if gift.get('link'):
