@@ -81,7 +81,7 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
     cumulative = 0
     selected_gift = None
     for gift in case["gifts"]:
-        cumulative += gift["fake_chance"]
+        cumulative += gift["chance"]
         if rnd <= cumulative:
             selected_gift = gift
             break
