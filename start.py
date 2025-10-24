@@ -86,7 +86,6 @@ async def get_case_complete_data(case_id, random_length=32):
             for case in cases:
                 if case.get("id") == case_id:
                     target_case = case
-                    print(case)
                     break
             
             if not target_case:
@@ -119,7 +118,6 @@ async def get_case_complete_data(case_id, random_length=32):
             result["random_gifts"] = []
             
             if gifts_list:  # Если есть подарки в кейсе
-                print(gifts_list)
                 for _ in range(random_length):
                     # Выбираем подарок на основе шансов
                     rnd = random.random()
@@ -127,9 +125,7 @@ async def get_case_complete_data(case_id, random_length=32):
                     selected_gift = None
 
                     for gift in gifts_list:
-                        print(gift)
-                        chance = gift.get("chance")
-                        print(chance)
+                        chance = gift.get("fake_chance")
                         if chance is None:
                             continue
                         cumulative += chance
@@ -147,8 +143,6 @@ async def get_case_complete_data(case_id, random_length=32):
                         "price": selected_gift.get("price"),
                         "chance": selected_gift.get("fake_chance")
                     })
-                    print(gift.get("fake_chance"))
-            print(result["random_gifts"])
             return result
             
     except (FileNotFoundError, json.JSONDecodeError) as e:
