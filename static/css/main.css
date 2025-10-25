@@ -288,6 +288,23 @@ html, body{
     overflow-x: scroll;
 }
 
+.list-items::-webkit-scrollbar {
+    height: 2vh;
+}
+
+.list-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.list-items::-webkit-scrollbar-thumb {
+    background-color: rgba(51, 88, 129, 0.8);
+    border-radius: 1vw;
+}
+
+.list-items::-webkit-scrollbar-button {
+    display: none;
+}
+
 .gift-img{
     aspect-ratio: 1 / 1;
     display: flex;
