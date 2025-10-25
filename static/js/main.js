@@ -111,6 +111,13 @@ function renderSlider(wonGift = null) {
 }
 
 
+function randomizeSlider() {
+    let random_gifts = JSON.parse(document.getElementById('data-block').dataset.randomGifts).random_gifts;
+    random_gifts = random_gifts.sort(() => Math.random() - 0.5);
+    document.getElementById('data-block').dataset.randomGifts = JSON.stringify({ random_gifts: random_gifts });
+}
+
+
 async function open_case() {
 
     const btn = document.getElementById('open_case');
@@ -151,6 +158,7 @@ async function open_case() {
                 alert('Подарок не найден');
             }
             await sleep(300);
+            randomizeSlider();
             renderSlider();
         }
         else {
