@@ -196,6 +196,7 @@ html, body{
     font-size: 2vh;
     border: none;
     border-radius: 3vw;
+    margin-bottom: 0;
 }
 
 #close{
