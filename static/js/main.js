@@ -24,7 +24,7 @@ if (localStorage.getItem('case_id')) {
 }
 
 let user_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
-if (!window.Telegram?.WebApp.initDataUnsafe?.user?.id) {
+if (!user_id) {
     window.location.href = "/404";
 }
 
@@ -124,13 +124,15 @@ async function open_case() {
     btn.setAttribute('disabled', '');
     btn.innerText = 'Открываем...';
     btn.style.backgroundColor = '#255ea0';
+    const demo = document.getElementById('demo_mode').checked;
 
 
     try {
         tg = window.Telegram?.WebApp;
         const result = await sendApiRequest('/api/open_case', {
             init_data: tg.initData,
-            case_id: document.getElementById('data-block').dataset.caseId
+            case_id: document.getElementById('data-block').dataset.caseId,
+            demo: demo
         });
 
         if (!result.error) {
@@ -153,7 +155,7 @@ async function open_case() {
             await sleep(3200);
 
             if (wonGift) {
-                showWinModal(wonGift);
+                showWinModal(wonGift, demo);
             } else {
                 alert('Подарок не найден');
             }
@@ -176,7 +178,7 @@ async function open_case() {
     btn.style.backgroundColor = '#3281dc';
 }
 
-function showWinModal(gift) {
+function showWinModal(gift, demo) {
 
     const modal = document.getElementById("modal");
     document.getElementById('sell_btn').style.display = "block";
@@ -191,13 +193,19 @@ function showWinModal(gift) {
 
     if (gift) {
 
-        if (gift.price){
-            modal.querySelector('.cnt').textContent = gift.price;
-            document.getElementById('sell_btn').onclick = () => sell_gift(gift.id);
-            modal.querySelector('.img img').src = gift.image;
+        if (!demo) {
+            if (gift.price){
+                modal.querySelector('.cnt').textContent = gift.price;
+                document.getElementById('sell_btn').onclick = () => sell_gift(gift.id);
+                modal.querySelector('.img img').src = gift.image;
+            } else {
+                modal.querySelector('.img img').src = '/media/failed.png';
+                modal.querySelector('.holder').innerHTML = '<h2 style="color: white;" class="cnt">Повезёт в другой раз</h2>';
+                document.getElementById('sell_btn').style.display = "none";
+            }
         } else {
-            modal.querySelector('.img img').src = '/media/failed.png';
-            modal.querySelector('.holder').innerHTML = '<h2 style="color: white;" class="cnt">Повезёт в другой раз</h2>';
+            modal.querySelector('.img img').src = gift.image;
+            modal.querySelector('.holder').innerHTML = '<h2 style="color: white;" class="cnt">Режим тестирования</h2>';
             document.getElementById('sell_btn').style.display = "none";
         }
 

@@ -282,12 +282,14 @@ async def handle_open_case(request: Request):
     user_data = await verify_telegram_webapp_data(data.get("init_data"))
     user_id = user_data.get("id")
     case_id = data.get("case_id")
+    demo = data.get("demo", True)
     if not user_id:
         raise HTTPException(status_code=404, detail="Missing user_data")
 
     result = await try_open_case(
         user_id,
         case_id,
+        demo,
         get_user,
         update_user_balance_and_gifts
     )

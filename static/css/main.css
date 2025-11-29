@@ -209,10 +209,15 @@ html, body{
     overflow: hidden;
 }
 
+.open-container{
+    display: grid;
+    grid-template-columns: 80% 20%;
+}
+
 #open_case{
-    width: calc(100% - 4vw);
+    width: calc(100% - 2vw);
     height: 6vh;
-    margin: 1vh 2vw;
+    margin: 1vh 0;
     background-color: #3281dc;
     color: white;
     font-size: 2vh;
@@ -221,6 +226,67 @@ html, body{
     margin-bottom: 4vh;
 }
 
+.demo-block{
+    width: 100%;
+    height: 6vh;
+    background-color: #2e3b4b;
+    border-radius: 3vw;
+    margin: 1vh 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0.7vh;
+}
+
+.demo-block > span{
+    color: #cddbeb;
+    font-size: 1vh;
+}
+
+.demo {
+    display: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ios-toggle {
+    position: relative;
+    display: inline-block;
+    width: 4vh;
+    height: 2vh;
+    background-color: #e5e5ea;
+    border-radius: 2vh;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ios-toggle::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 1.6vh;
+    height: 1.6vh;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.demo:checked + .ios-toggle {
+    background-color: #3281dc;
+}
+
+.demo:checked + .ios-toggle::after {
+    transform: translateX(2vh);
+}
+
+.demo:disabled + .ios-toggle {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 
 .line{
     position: absolute;
@@ -309,10 +375,10 @@ html, body{
     aspect-ratio: 1 / 1;
     display: flex;
     justify-content: center;
-    align-items: center; /* Добавьте это */
+    align-items: center;
     max-height: 70%;
-    width: 100%; /* Добавьте это */
-    max-width: 100%; /* Добавьте это */
+    width: 100%;
+    max-width: 100%;
 }
 
 .gimg{

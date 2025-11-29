@@ -65,18 +65,21 @@ def get_gift_by_id(case, gift_id):
     return next((g for g in case["gifts"] if g["id"] == gift_id), None)
 
 
-async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gifts):
+async def try_open_case(user_id, case_id, demo, get_user, update_user_balance_and_gifts):
     cases = load_cases()
     case = next((c for c in cases if c["id"] == case_id), None)
     if not case:
         return {"error": "Кейс не найден"}
+    
     price = case["price"]
     row = await get_user(user_id)
     if not row:
         return {"error": "Пользователь не найден"}
+    
     balance, gifts_raw = row
-    if balance < price:
+    if not demo and balance < price:
         return {"error": "Недостаточно средств"}
+    
     rnd = random.random()
     cumulative = 0
     selected_gift = None
@@ -85,13 +88,17 @@ async def try_open_case(user_id, case_id, get_user, update_user_balance_and_gift
         if rnd <= cumulative:
             selected_gift = gift
             break
+
     if not selected_gift:
         selected_gift = case["gifts"][-1]
-    new_balance = balance - price
-    gifts_list = json.loads(gifts_raw) if gifts_raw else []
-    if selected_gift.get("price", 0) != 0:
-        gifts_list.append(selected_gift["id"])
-    await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
+
+    if not demo:
+        new_balance = balance - price
+        gifts_list = json.loads(gifts_raw) if gifts_raw else []
+        if selected_gift.get("price", 0) != 0:
+            gifts_list.append(selected_gift["id"])
+        await update_user_balance_and_gifts(user_id, new_balance, gifts_list)
+
     return {
         "gift": {
             "id": selected_gift["id"],
