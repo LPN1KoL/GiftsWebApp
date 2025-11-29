@@ -80,17 +80,30 @@ async def try_open_case(user_id, case_id, demo, get_user, update_user_balance_an
     if not demo and balance < price:
         return {"error": "Недостаточно средств"}
     
-    rnd = random.random()
-    cumulative = 0
-    selected_gift = None
-    for gift in case["gifts"]:
-        cumulative += gift["chance"]
-        if rnd <= cumulative:
-            selected_gift = gift
-            break
+    if not demo:
+        rnd = random.random()
+        cumulative = 0
+        selected_gift = None
+        for gift in case["gifts"]:
+            cumulative += gift["chance"]
+            if rnd <= cumulative:
+                selected_gift = gift
+                break
 
-    if not selected_gift:
-        selected_gift = case["gifts"][-1]
+        if not selected_gift:
+            selected_gift = case["gifts"][-1]
+    else:
+        rnd = random.random()
+        cumulative = 0
+        selected_gift = None
+        for gift in case["gifts"]:
+            cumulative += gift["fake_chance"]
+            if rnd <= cumulative:
+                selected_gift = gift
+                break
+
+        if not selected_gift:
+            selected_gift = case["gifts"][-1]
 
     if not demo:
         new_balance = balance - price
