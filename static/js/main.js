@@ -124,7 +124,7 @@ async function open_case() {
     btn.setAttribute('disabled', '');
     btn.innerText = 'Открываем...';
     btn.style.backgroundColor = '#255ea0';
-    const demo = document.getElementById('demo_mode').checked;
+    const demo = document.getElementById('demo').checked;
 
 
     try {
