@@ -185,7 +185,7 @@
         "id": "gift-4-1975",
         "name": "DiamondRing",
         "link": "https://t.me/nft/DiamondRing-25415",
-        "img": "/media/gifts/gift-4-1975.png",
+        "img": "media/gifts/gift-4-1975.png",
         "chance": 0.0,
         "fake_chance": 0.09,
         "price": 5000
