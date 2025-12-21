@@ -3,18 +3,63 @@ import os
 import random
 import asyncio
 import threading
+from db import get_all_cases_with_gifts, get_case_with_gifts, update_case, create_case, create_gift, update_gift, delete_case, delete_gift
 
 
-def load_cases():
-    if os.path.exists("data/cases.json"):
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            return json.load(f)
-    return []
+async def load_cases():
+    """Load all cases from database"""
+    return await get_all_cases_with_gifts()
 
-def save_cases(cases):
-    os.makedirs("data", exist_ok=True)
-    with open("data/cases.json", "w", encoding="utf-8") as f:
-        json.dump(cases, f, ensure_ascii=False, indent=2)
+async def save_cases(cases):
+    """Save cases to database (for backward compatibility)"""
+    # This function is kept for backward compatibility but updates the database
+    # Note: This is a simplified version and may need refinement based on usage patterns
+    for case in cases:
+        existing_case = await get_case_with_gifts(case['id'])
+        if existing_case:
+            # Update existing case
+            await update_case(
+                case['id'],
+                category=case.get('category'),
+                name=case.get('name'),
+                price=case.get('price'),
+                logo=case.get('logo'),
+                published=case.get('published', False)
+            )
+            # Update gifts
+            for gift in case.get('gifts', []):
+                await update_gift(
+                    gift['id'],
+                    case_id=case['id'],
+                    name=gift['name'],
+                    link=gift.get('link'),
+                    img=gift.get('img'),
+                    chance=gift['chance'],
+                    fake_chance=gift.get('fake_chance', gift['chance']),
+                    price=gift.get('price', 0)
+                )
+        else:
+            # Create new case
+            await create_case(
+                case['id'],
+                case.get('category', 'basic'),
+                case.get('name', 'New Case'),
+                case.get('price', 100),
+                case.get('logo'),
+                case.get('published', False)
+            )
+            # Create gifts
+            for gift in case.get('gifts', []):
+                await create_gift(
+                    gift['id'],
+                    case['id'],
+                    gift['name'],
+                    gift.get('link'),
+                    gift.get('img'),
+                    gift['chance'],
+                    gift.get('fake_chance', gift['chance']),
+                    gift.get('price', 0)
+                )
 
 async def update_case_icon(case):
     if not case['gifts']:
@@ -45,10 +90,10 @@ async def create_gift_icon(gift, screenshot_func):
         except Exception as e:
             print(f"❌ Ошибка при создании иконки подарка {gift['id']}: {e}")
 
-def get_gift_info_by_ids(gifts_json):
+async def get_gift_info_by_ids(gifts_json):
+    """Get gift information by IDs from database"""
     try:
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            cases = json.load(f)
+        cases = await load_cases()
     except Exception:
         return []
     gift_info = {gift["id"]: gift for case in cases for gift in case["gifts"]}
@@ -56,18 +101,17 @@ def get_gift_info_by_ids(gifts_json):
     user_gifts = [gift_info[gid] for gid in gifts_ids if gid in gift_info]
     return user_gifts
 
-def get_case_by_id(case_id):
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
-    return case
+async def get_case_by_id(case_id):
+    """Get a case by ID from database"""
+    return await get_case_with_gifts(case_id)
 
 def get_gift_by_id(case, gift_id):
+    """Get a gift by ID from case"""
     return next((g for g in case["gifts"] if g["id"] == gift_id), None)
 
 
 async def try_open_case(user_id, case_id, demo, get_user, update_user_balance_and_gifts):
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         return {"error": "Кейс не найден"}
     
@@ -129,7 +173,7 @@ async def try_sell_gift(user_id, gift_id, get_user, update_user_balance_and_gift
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
     if gift_id not in gifts_list:
         return {"error": "Подарок не найден в инвентаре"}
-    cases = load_cases()
+    cases = await load_cases()
     gift_info = {gift["id"]: gift for case in cases for gift in case["gifts"]}
     gift = gift_info.get(gift_id)
     if not gift:
@@ -149,7 +193,7 @@ async def try_get_gift(user_id, gift_id, get_user, send_notification_to_admin, u
     gifts_list = json.loads(gifts_raw) if gifts_raw else []
     if gift_id not in gifts_list:
         return {"error": "Подарок не найден в инвентаре"}
-    cases = load_cases()
+    cases = await load_cases()
     data = {"name": gift["name"] for case in cases for gift in case["gifts"] if gift["id"] == gift_id}
     if not data:
         return {"error": "Информация о подарке не найдена"}

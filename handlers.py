@@ -129,7 +129,7 @@ async def handle_admin_close(callback: CallbackQuery):
 
 @router.callback_query(F.data == "admin_cases")
 async def handle_admin_cases(callback: CallbackQuery):
-    cases = load_cases()
+    cases = await load_cases()
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="➕ Создать кейс", callback_data="case_create")],
         [InlineKeyboardButton(text="📋 Список кейсов", callback_data="case_list")],
@@ -147,7 +147,7 @@ async def handle_admin_back(callback: CallbackQuery):
 
 @router.callback_query(F.data == "case_list")
 async def handle_case_list(callback: CallbackQuery):
-    cases = load_cases()
+    cases = await load_cases()
     if not cases:
         keyboard = InlineKeyboardMarkup(inline_keyboard=[
             [InlineKeyboardButton(text="➕ Создать кейс", callback_data="case_create")],
@@ -169,8 +169,7 @@ async def handle_case_list(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("case_edit_"))
 async def handle_case_edit(callback: CallbackQuery):
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
@@ -201,9 +200,9 @@ async def handle_case_edit(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("case_publish_"))
 async def handle_case_publish(callback: CallbackQuery):
+    from db import update_case
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
 
     if not case:
         await callback.answer("❌ Кейс не найден", show_alert=True)
@@ -213,8 +212,7 @@ async def handle_case_publish(callback: CallbackQuery):
         await callback.answer("⚠️ Кейс уже опубликован", show_alert=True)
         return
 
-    case["published"] = True  # 👈 публикуем
-    save_cases(cases)
+    await update_case(case_id, published=True)
 
     await callback.answer("✅ Кейс опубликован")
     await handle_case_edit(callback)
@@ -224,8 +222,7 @@ async def handle_case_publish(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("case_info_"))
 async def handle_case_info(callback: CallbackQuery, state: FSMContext):
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
@@ -243,6 +240,7 @@ async def handle_case_info(callback: CallbackQuery, state: FSMContext):
 
 @router.message(CaseEditState.waiting_for_case_info)
 async def handle_case_info_input(message: Message, state: FSMContext):
+    from db import update_case
     try:
         data = await state.get_data()
         case_id = data['case_id']
@@ -253,14 +251,15 @@ async def handle_case_info_input(message: Message, state: FSMContext):
         name = lines[0].strip()
         price = int(lines[1].strip())
         category = lines[2].strip()
-        cases = load_cases()
-        case = next((c for c in cases if c["id"] == case_id), None)
+        case = await get_case_by_id(case_id)
         if case:
+            await update_case(case_id, name=name, price=price, category=category)
             case['name'] = name
             case['price'] = price
             case['category'] = category
             await update_case_icon(case)
-            save_cases(cases)
+            # Update the logo in database after icon update
+            await update_case(case_id, logo=case.get('logo'))
             await message.answer("✅ Данные кейса обновлены!")
         else:
             await message.answer("❌ Кейс не найден")
@@ -273,8 +272,7 @@ async def handle_case_info_input(message: Message, state: FSMContext):
 @router.callback_query(F.data.startswith("case_gifts_"))
 async def handle_case_gifts(callback: CallbackQuery):
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
@@ -292,7 +290,6 @@ async def handle_case_gifts(callback: CallbackQuery):
 @router.callback_query(F.data.startswith("case_delete_"))
 async def handle_case_delete(callback: CallbackQuery):
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="✅ Да, удалить", callback_data=f"case_confirm_delete_{case_id}")],
         [InlineKeyboardButton(text="❌ Нет, отмена", callback_data=f"case_edit_{case_id}")]
@@ -301,51 +298,52 @@ async def handle_case_delete(callback: CallbackQuery):
 
 @router.callback_query(F.data.startswith("case_confirm_delete_"))
 async def handle_case_confirm_delete(callback: CallbackQuery):
+    from db import delete_case
     case_id = callback.data.split("_")[3]
-    cases = load_cases()
-    cases = [c for c in cases if c["id"] != case_id]
-    save_cases(cases)
+    await delete_case(case_id)
     await callback.answer("✅ Кейс удален")
     await handle_case_list(callback)
 
 @router.callback_query(F.data == "case_create")
 async def handle_case_create(callback: CallbackQuery):
-    cases = load_cases()
-    new_case = {
-        "id": f"case-{len(cases) + 1}",
-        "category": "basic",
-        "name": f"Новый кейс {len(cases) + 1}",
-        "price": 100,
-        "logo": "/media/default.png",
-        "gifts": [],
-        "published": False
-    }
-    cases.append(new_case)
-    save_cases(cases)
+    from db import create_case
+    cases = await load_cases()
+    new_case_id = f"case-{len(cases) + 1}"
+    await create_case(
+        new_case_id,
+        "basic",
+        f"Новый кейс {len(cases) + 1}",
+        100,
+        "/media/default.png",
+        False
+    )
     await callback.answer("✅ Новый кейс создан")
+    # Update callback data to edit the new case
+    callback.data = f"case_edit_{new_case_id}"
     await handle_case_edit(callback)
 
 # --- Гифты ---
 
 @router.callback_query(F.data.startswith("gift_add_"))
 async def handle_gift_add(callback: CallbackQuery):
+    from db import create_gift, get_gifts_by_case
     case_id = callback.data.split("_")[2]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
-    new_gift = {
-        "id": f"gift-{len(case['gifts']) + 1}-{random.randint(1000, 9999)}",
-        "name": "Новый подарок",
-        "link": "https://example.com/gift",
-        "img": "/media/gift.png",
-        "chance": 0.1,
-        "fake_chance": 0.1,
-        "price": 100
-    }
-    case["gifts"].append(new_gift)
-    save_cases(cases)
+    gifts = await get_gifts_by_case(case_id)
+    new_gift_id = f"gift-{len(gifts) + 1}-{random.randint(1000, 9999)}"
+    await create_gift(
+        new_gift_id,
+        case_id,
+        "Новый подарок",
+        "https://example.com/gift",
+        "/media/gift.png",
+        0.1,
+        0.1,
+        100
+    )
     await callback.answer("✅ Подарок добавлен")
     await handle_case_gifts(callback)
 
@@ -355,12 +353,11 @@ async def handle_gift_edit(callback: CallbackQuery, state: FSMContext):
     data_parts = callback.data.split("_")
     case_id = data_parts[2]
     gift_id = data_parts[3]
-    cases = load_cases()
-    case = next((c for c in cases if c["id"] == case_id), None)
+    case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
-    gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+    gift = get_gift_by_id(case, gift_id)
     if not gift:
         await callback.answer("❌ Подарок не найден")
         return
@@ -488,13 +485,14 @@ async def handle_gift_photo_input(message: Message, state: FSMContext):
             await message.answer("❌ Пожалуйста, отправьте изображение или напишите 'пропустить'")
             return
 
-        # Обновляем данные подарка
-        cases = load_cases()
-        case = next((c for c in cases if c["id"] == case_id), None)
+        # Обновляем данные подарка в базе данных
+        from db import update_gift, update_case
+        case = await get_case_by_id(case_id)
         if case:
-            gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+            gift = get_gift_by_id(case, gift_id)
             if gift:
-                update_data = {
+                # Update gift in database
+                update_kwargs = {
                     'name': name,
                     'chance': chance,
                     'fake_chance': fake_chance,
@@ -502,12 +500,16 @@ async def handle_gift_photo_input(message: Message, state: FSMContext):
                 }
                 # Обновляем иконку только если она была определена
                 if icon_path is not None:
-                    update_data['img'] = icon_path
-                
-                gift.update(update_data)
+                    update_kwargs['img'] = icon_path
+
+                await update_gift(gift_id, **update_kwargs)
+
+                # Update local gift object for update_case_icon
+                gift.update(update_kwargs)
                 await update_case_icon(case)
-                save_cases(cases)
-                
+                # Update case logo in database
+                await update_case(case_id, logo=case.get('logo'))
+
                 if price == 0:
                     await message.answer("✅ Подарок обновлён! Использована иконка failed.png (цена 0)")
                 else:
@@ -525,6 +527,7 @@ async def handle_gift_photo_input(message: Message, state: FSMContext):
 
 @router.message(GiftEditState.waiting_for_gift_url)
 async def handle_gift_url_input(message: Message, state: FSMContext):
+    from db import update_gift
     try:
         data = await state.get_data()
         case_id = data['case_id']
@@ -534,23 +537,26 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
         fake_chance = data["gift_fake_chance"]
         price = data["gift_price"]
         new_url = message.text.strip() if message.text.strip().lower() != 'пропустить' else None
-        cases = load_cases()
-        case = next((c for c in cases if c["id"] == case_id), None)
+        case = await get_case_by_id(case_id)
         if case:
-            gift = next((g for g in case["gifts"] if g["id"] == gift_id), None)
+            gift = get_gift_by_id(case, gift_id)
             if gift:
+                # Update gift in memory for icon creation
                 gift['name'] = name
                 gift['chance'] = chance
                 gift["price"] = price
                 gift["fake_chance"] = fake_chance
                 if new_url:
                     gift['link'] = new_url
+                    # Update in database
+                    await update_gift(gift_id, name=name, chance=chance, price=price, fake_chance=fake_chance, link=new_url)
                     # Запускаем создание иконки в фоне
                     asyncio.create_task(create_gift_icon_with_notification(message.bot, gift, case, message.chat.id))
                     await message.answer("⏳ Создаю иконку из ссылки... Это может занять несколько секунд")
                 else:
+                    # Update in database without link
+                    await update_gift(gift_id, name=name, chance=chance, price=price, fake_chance=fake_chance)
                     await message.answer("✅ Подарок обновлен (ссылка не изменена)!")
-                save_cases(cases)
             else:
                 await message.answer("❌ Подарок не найден")
         else:
@@ -560,14 +566,14 @@ async def handle_gift_url_input(message: Message, state: FSMContext):
     await state.clear()
 
 async def create_gift_icon_with_notification(bot: Bot, gift, case, chat_id):
+    from db import update_gift, update_case
     try:
         await create_gift_icon(gift, take_screenshot_and_process)
         await update_case_icon(case)
-        cases = load_cases()
-        current_case = next((c for c in cases if c["id"] == case["id"]), None)
-        if current_case:
-            current_case['gifts'] = [g if g['id'] != gift['id'] else gift for g in current_case['gifts']]
-            save_cases(cases)
+        # Update gift image in database
+        await update_gift(gift['id'], img=gift.get('img'))
+        # Update case logo in database
+        await update_case(case['id'], logo=case.get('logo'))
         await bot.send_message(chat_id, f"✅ Иконка для подарка '{gift['name']}' создана успешно!")
     except Exception as e:
         error_msg = f"❌ Ошибка при создании иконки: {e}"

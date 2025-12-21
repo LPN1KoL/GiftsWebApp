@@ -42,111 +42,102 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 # --- Вспомогательные функции ---
 async def load_cases_data():
+    """Load published cases from database"""
+    from db import get_all_cases
     try:
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            cases = json.load(f)
+        cases = await get_all_cases(published_only=True)
 
-            # Фильтруем только опубликованные кейсы
-            filtered_cases = []
-            for case in cases:
-                if not case.get("published", False):
-                    continue  # пропускаем неопубликованные
-                
-                filtered_case = {
-                    "id": case.get("id"),
-                    "name": case.get("name"),
-                    "price": case.get("price"),
-                    "logo": case.get("logo"),
-                    "category": case.get("category")
-                }
-                filtered_cases.append(filtered_case)
+        # Фильтруем только нужные поля
+        filtered_cases = []
+        for case in cases:
+            filtered_case = {
+                "id": case.get("id"),
+                "name": case.get("name"),
+                "price": case.get("price"),
+                "logo": case.get("logo"),
+                "category": case.get("category")
+            }
+            filtered_cases.append(filtered_case)
 
-            return filtered_cases
+        return filtered_cases
 
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Ошибка загрузки cases.json: {e}")
+    except Exception as e:
+        print(f"Ошибка загрузки кейсов из БД: {e}")
         return []
 
     
 
 async def get_case_complete_data(case_id, random_length=32):
     """
-    Универсальная функция для получения всех данных о кейсе за одно чтение файла
+    Универсальная функция для получения всех данных о кейсе из базы данных
     :param case_id: ID кейса
     :param random_length: Количество случайных подарков (по умолчанию 32)
     :return: Словарь с тремя ключами: case_data, gifts, random_gifts
              или None если кейс не найден
     """
+    from db import get_case_with_gifts
     try:
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            cases = json.load(f)
-            
-            # Ищем нужный кейс
-            target_case = None
-            for case in cases:
-                if case.get("id") == case_id:
-                    target_case = case
-                    break
-            
-            if not target_case:
-                return None
-            
-            result = {}
-            gifts_list = target_case.get("gifts", [])
-            
-            # 1. Данные кейса
-            result["case_data"] = {
-                "id": target_case.get("id"),
-                "name": target_case.get("name"),
-                "price": target_case.get("price"),
-                "logo": target_case.get("logo")
-            }
-            
-            # 2. Список всех подарков с fake_chance
-            result["gifts"] = []
-            for gift in gifts_list:
-                if gift.get("price") != 0:
-                    result["gifts"].append({
-                        "id": gift.get("id"),
-                        "name": gift.get("name"),
-                        "image": gift.get("img"),  
-                        "price": gift.get("price"),
-                        "chance": gift.get("fake_chance")
-                    })
-            
-            # 3. Список из 32 случайных подарков
-            result["random_gifts"] = []
-            
-            if gifts_list:  # Если есть подарки в кейсе
-                for _ in range(random_length):
-                    # Выбираем подарок на основе шансов
-                    rnd = random.random()
-                    cumulative = 0
-                    selected_gift = None
+        target_case = await get_case_with_gifts(case_id)
 
-                    for gift in gifts_list:
-                        chance = gift.get("fake_chance")
-                        if chance is None:
-                            continue
-                        cumulative += chance
-                        if rnd <= cumulative:
-                            selected_gift = gift
-                            break
-                    
-                    if not selected_gift:
-                        selected_gift = gifts_list[-1]
+        if not target_case:
+            return None
 
-                    result["random_gifts"].append({
-                        "id": selected_gift.get("id"),
-                        "name": selected_gift.get("name"),
-                        "image": selected_gift.get("img"),
-                        "price": selected_gift.get("price"),
-                        "chance": selected_gift.get("fake_chance")
-                    })
-            return result
-            
-    except (FileNotFoundError, json.JSONDecodeError) as e:
-        print(f"Ошибка загрузки cases.json: {e}")
+        result = {}
+        gifts_list = target_case.get("gifts", [])
+
+        # 1. Данные кейса
+        result["case_data"] = {
+            "id": target_case.get("id"),
+            "name": target_case.get("name"),
+            "price": target_case.get("price"),
+            "logo": target_case.get("logo")
+        }
+
+        # 2. Список всех подарков с fake_chance
+        result["gifts"] = []
+        for gift in gifts_list:
+            if gift.get("price") != 0:
+                result["gifts"].append({
+                    "id": gift.get("id"),
+                    "name": gift.get("name"),
+                    "image": gift.get("img"),
+                    "price": gift.get("price"),
+                    "chance": gift.get("fake_chance")
+                })
+
+        # 3. Список из 32 случайных подарков
+        result["random_gifts"] = []
+
+        if gifts_list:  # Если есть подарки в кейсе
+            for _ in range(random_length):
+                # Выбираем подарок на основе шансов
+                rnd = random.random()
+                cumulative = 0
+                selected_gift = None
+
+                for gift in gifts_list:
+                    chance = gift.get("fake_chance")
+                    if chance is None:
+                        continue
+                    cumulative += chance
+                    if rnd <= cumulative:
+                        selected_gift = gift
+                        break
+
+                if not selected_gift:
+                    selected_gift = gifts_list[-1]
+
+                result["random_gifts"].append({
+                    "id": selected_gift.get("id"),
+                    "name": selected_gift.get("name"),
+                    "image": selected_gift.get("img"),
+                    "price": selected_gift.get("price"),
+                    "chance": selected_gift.get("fake_chance")
+                })
+        return result
+
+    except Exception as e:
+        print(f"Ошибка загрузки кейса из БД: {e}")
         return None
 
 
@@ -348,24 +339,23 @@ async def handle_get_profile(request: Request):
         profile_data = await get_profile_data_and_tasks(user_id)
         
 
-        # Получаем всю информацию о подарках пользователя
+        # Получаем всю информацию о подарках пользователя из базы данных
+        from db import get_all_gifts
         gifts_ids = json.loads(profile_data.get("gifts_json", "[]"))
         gifts_info = []
-        with open("data/cases.json", "r", encoding="utf-8") as f:
-            cases = json.load(f)
-            all_gifts = {}
-            for case in cases:
-                for gift in case.get("gifts", []):
-                    all_gifts[gift["id"]] = {
-                        "id": gift["id"],
-                        "name": gift["name"],
-                        "image": gift["img"],
-                        "price": gift["price"]
-                    }
-            for gift_id in gifts_ids:
-                gift_data = all_gifts.get(gift_id)
-                if gift_data:
-                    gifts_info.append(gift_data)
+        all_gifts_list = await get_all_gifts()
+        all_gifts = {}
+        for gift in all_gifts_list:
+            all_gifts[gift["id"]] = {
+                "id": gift["id"],
+                "name": gift["name"],
+                "image": gift["img"],
+                "price": gift["price"]
+            }
+        for gift_id in gifts_ids:
+            gift_data = all_gifts.get(gift_id)
+            if gift_data:
+                gifts_info.append(gift_data)
 
         balance = profile_data.get("balance", 0)
 
