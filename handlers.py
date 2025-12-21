@@ -318,9 +318,32 @@ async def handle_case_create(callback: CallbackQuery):
         False
     )
     await callback.answer("✅ Новый кейс создан")
-    # Update callback data to edit the new case
-    callback.data = f"case_edit_{new_case_id}"
-    await handle_case_edit(callback)
+
+    # Show the newly created case details
+    case = await get_case_by_id(new_case_id)
+    if not case:
+        await callback.message.edit_text("❌ Ошибка при создании кейса")
+        return
+
+    # Определяем текст для кнопки (если уже опубликован — пишем, что опубликован)
+    publish_btn_text = "📢 Опубликовать кейс" if not case.get("published", False) else "✅ Кейс опубликован"
+
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="✏️ Редактировать информацию", callback_data=f"case_info_{new_case_id}")],
+        [InlineKeyboardButton(text="🎁 Управление подарками", callback_data=f"case_gifts_{new_case_id}")],
+        [InlineKeyboardButton(text=publish_btn_text, callback_data=f"case_publish_{new_case_id}")],
+        [InlineKeyboardButton(text="🗑️ Удалить кейс", callback_data=f"case_delete_{new_case_id}")],
+        [InlineKeyboardButton(text="◀️ Назад", callback_data="case_list")]
+    ])
+
+    await callback.message.edit_text(
+        f"📦 Кейс: {case['name']}\n"
+        f"💰 Цена: {case['price']}₽\n"
+        f"🎁 Подарков: {len(case['gifts'])}\n"
+        f"📂 Категория: {case.get('category', 'Не указана')}\n"
+        f"📢 Статус: {'✅ Опубликован' if case.get('published', False) else '❌ Не опубликован'}",
+        reply_markup=keyboard
+    )
 
 # --- Гифты ---
 
