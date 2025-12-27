@@ -25,6 +25,9 @@ router = Router()
 class CaseEditState(StatesGroup):
     waiting_for_case_info = State()
 
+class CaseCreateState(StatesGroup):
+    waiting_for_case_info = State()
+
 class GiftEditState(StatesGroup):
     waiting_for_gift_info = State()
     waiting_for_gift_url = State()
@@ -311,60 +314,95 @@ async def handle_case_confirm_delete(callback: CallbackQuery):
     await handle_case_list(callback)
 
 @router.callback_query(F.data == "case_create")
-async def handle_case_create(callback: CallbackQuery):
-    from db import create_case
-    cases = await load_cases()
-
-    # Find the maximum case number to avoid duplicate IDs
-    max_case_num = 0
-    for case in cases:
-        case_id = case.get('id', '')
-        if case_id.startswith('case-'):
-            try:
-                case_num = int(case_id.split('-')[1])
-                max_case_num = max(max_case_num, case_num)
-            except (ValueError, IndexError):
-                # Skip cases with invalid ID format
-                pass
-
-    new_case_num = max_case_num + 1
-    new_case_id = f"case-{new_case_num}"
-
-    await create_case(
-        new_case_id,
-        "basic",
-        f"Новый кейс {new_case_num}",
-        100,
-        "/media/default.png",
-        False
-    )
-    await callback.answer("✅ Новый кейс создан")
-
-    # Show the newly created case details
-    case = await get_case_by_id(new_case_id)
-    if not case:
-        await callback.message.edit_text("❌ Ошибка при создании кейса")
-        return
-
-    # Определяем текст для кнопки (если уже опубликован — пишем, что опубликован)
-    publish_btn_text = "📢 Опубликовать кейс" if not case.get("published", False) else "✅ Кейс опубликован"
-
-    keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="✏️ Редактировать информацию", callback_data=f"case_info_{new_case_id}")],
-        [InlineKeyboardButton(text="🎁 Управление подарками", callback_data=f"case_gifts_{new_case_id}")],
-        [InlineKeyboardButton(text=publish_btn_text, callback_data=f"case_publish_{new_case_id}")],
-        [InlineKeyboardButton(text="🗑️ Удалить кейс", callback_data=f"case_delete_{new_case_id}")],
-        [InlineKeyboardButton(text="◀️ Назад", callback_data="case_list")]
-    ])
-
+async def handle_case_create(callback: CallbackQuery, state: FSMContext):
+    await state.set_state(CaseCreateState.waiting_for_case_info)
     await callback.message.edit_text(
-        f"📦 Кейс: {case['name']}\n"
-        f"💰 Цена: {case['price']}₽\n"
-        f"🎁 Подарков: {len(case['gifts'])}\n"
-        f"📂 Категория: {case.get('category', 'Не указана')}\n"
-        f"📢 Статус: {'✅ Опубликован' if case.get('published', False) else '❌ Не опубликован'}",
-        reply_markup=keyboard
+        f"➕ Создание нового кейса\n\n"
+        f"Отправьте данные в формате:\n"
+        f"<code>Название\nЦена (число)\nКатегория</code>\n\n"
+        f"Пример:\n"
+        f"<code>Золотой кейс\n500\nbasic</code>"
     )
+
+@router.message(CaseCreateState.waiting_for_case_info)
+async def handle_case_create_info(message: Message, state: FSMContext):
+    from db import create_case
+    try:
+        lines = message.text.split('\n')
+        if len(lines) < 3:
+            await message.answer("❌ Неверный формат. Нужно: Название\\nЦена\\nКатегория")
+            return
+
+        name = lines[0].strip()
+        try:
+            price = int(lines[1].strip())
+            if price < 0:
+                await message.answer("❌ Цена не может быть отрицательной")
+                return
+        except ValueError:
+            await message.answer("❌ Цена должна быть целым числом")
+            return
+
+        category = lines[2].strip()
+
+        # Find the maximum case number to avoid duplicate IDs
+        cases = await load_cases()
+        max_case_num = 0
+        for case in cases:
+            case_id = case.get('id', '')
+            if case_id.startswith('case-'):
+                try:
+                    case_num = int(case_id.split('-')[1])
+                    max_case_num = max(max_case_num, case_num)
+                except (ValueError, IndexError):
+                    # Skip cases with invalid ID format
+                    pass
+
+        new_case_num = max_case_num + 1
+        new_case_id = f"case-{new_case_num}"
+
+        # Create the case with user-provided data
+        await create_case(
+            new_case_id,
+            category,
+            name,
+            price,
+            "/media/default.png",
+            False
+        )
+
+        await message.answer("✅ Новый кейс создан!")
+
+        # Show the newly created case details
+        case = await get_case_by_id(new_case_id)
+        if not case:
+            await message.answer("❌ Ошибка при создании кейса")
+            await state.clear()
+            return
+
+        # Определяем текст для кнопки (если уже опубликован — пишем, что опубликован)
+        publish_btn_text = "📢 Опубликовать кейс" if not case.get("published", False) else "✅ Кейс опубликован"
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            [InlineKeyboardButton(text="✏️ Редактировать информацию", callback_data=f"case_info_{new_case_id}")],
+            [InlineKeyboardButton(text="🎁 Управление подарками", callback_data=f"case_gifts_{new_case_id}")],
+            [InlineKeyboardButton(text=publish_btn_text, callback_data=f"case_publish_{new_case_id}")],
+            [InlineKeyboardButton(text="🗑️ Удалить кейс", callback_data=f"case_delete_{new_case_id}")],
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="case_list")]
+        ])
+
+        await message.answer(
+            f"📦 Кейс: {case['name']}\n"
+            f"💰 Цена: {case['price']}₽\n"
+            f"🎁 Подарков: {len(case['gifts'])}\n"
+            f"📂 Категория: {case.get('category', 'Не указана')}\n"
+            f"📢 Статус: {'✅ Опубликован' if case.get('published', False) else '❌ Не опубликован'}",
+            reply_markup=keyboard
+        )
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+    finally:
+        await state.clear()
 
 # --- Гифты ---
 

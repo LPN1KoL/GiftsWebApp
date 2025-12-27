@@ -213,9 +213,19 @@ async def serve_main(request: Request):
         else:
             raise HTTPException(status_code=404, detail="Case not found")
     else:
-        data = await get_case_complete_data("case-1")
+        # Get the cheapest published case
+        from db import get_all_cases
+        cases = await get_all_cases(published_only=True)
+        if not cases:
+            raise HTTPException(status_code=404, detail="No published cases found")
+
+        # Find the cheapest case by price
+        cheapest_case = min(cases, key=lambda c: c.get('price', float('inf')))
+        cheapest_case_id = cheapest_case['id']
+
+        data = await get_case_complete_data(cheapest_case_id)
         if data:
-            return templates.TemplateResponse("main.html", {"request": request, "case_id": "case-1", "gifts": data["gifts"], "random_gifts": {"random_gifts": data["random_gifts"]}, "case_data": data["case_data"]})
+            return templates.TemplateResponse("main.html", {"request": request, "case_id": cheapest_case_id, "gifts": data["gifts"], "random_gifts": {"random_gifts": data["random_gifts"]}, "case_data": data["case_data"]})
         else:
             raise HTTPException(status_code=404, detail="Case not found")
  
