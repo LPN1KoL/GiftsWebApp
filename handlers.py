@@ -1,9 +1,11 @@
 import random
+import os
 from aiogram import Bot, Dispatcher, types, F, Router
 from aiogram.filters import Command
 from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, LabeledPrice
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
+from PIL import Image
 
 from db import *
 from cases import *
@@ -26,6 +28,10 @@ class CaseEditState(StatesGroup):
 class GiftEditState(StatesGroup):
     waiting_for_gift_info = State()
     waiting_for_gift_url = State()
+
+class GiftCreateState(StatesGroup):
+    waiting_for_gift_info = State()
+    waiting_for_gift_photo = State()
 
 
 # --- КОМАНДЫ ---
@@ -348,27 +354,159 @@ async def handle_case_create(callback: CallbackQuery):
 # --- Гифты ---
 
 @router.callback_query(F.data.startswith("gift_add_"))
-async def handle_gift_add(callback: CallbackQuery):
-    from db import create_gift, get_gifts_by_case
+async def handle_gift_add(callback: CallbackQuery, state: FSMContext):
     case_id = callback.data.split("_")[2]
     case = await get_case_by_id(case_id)
     if not case:
         await callback.answer("❌ Кейс не найден")
         return
-    gifts = await get_gifts_by_case(case_id)
-    new_gift_id = f"gift-{len(gifts) + 1}-{random.randint(1000, 9999)}"
-    await create_gift(
-        new_gift_id,
-        case_id,
-        "Новый подарок",
-        "https://example.com/gift",
-        "/media/gift.png",
-        0.1,
-        0.1,
-        100
+
+    await state.set_state(GiftCreateState.waiting_for_gift_info)
+    await state.update_data(case_id=case_id)
+    await callback.message.edit_text(
+        f"➕ Создание нового подарка для кейса: {case['name']}\n\n"
+        f"Отправьте данные в формате:\n"
+        f"<code>Название\nШанс (0.0-1.0)\nФейковый шанс (0.0-1.0)\nЦена (число)</code>\n\n"
+        f"Пример:\n"
+        f"<code>iPhone 15 Pro\n0.05\n0.15\n120000</code>"
     )
-    await callback.answer("✅ Подарок добавлен")
-    await handle_case_gifts(callback)
+
+
+@router.message(GiftCreateState.waiting_for_gift_info)
+async def handle_gift_create_info(message: Message, state: FSMContext):
+    try:
+        lines = message.text.split('\n')
+
+        if len(lines) < 4:
+            await message.answer("❌ Неверный формат. Нужно: Название\nШанс\nФейковый шанс\nЦена")
+            return
+
+        name = lines[0].strip()
+
+        # основной шанс
+        chance = float(lines[1].strip())
+        if not 0 <= chance <= 1:
+            await message.answer("❌ Шанс должен быть между 0 и 1")
+            return
+
+        # фейковый шанс
+        fake_chance = float(lines[2].strip())
+        if not 0 <= fake_chance <= 1:
+            await message.answer("❌ Фейковый шанс должен быть между 0 и 1")
+            return
+
+        # цена
+        try:
+            price = int(lines[3].strip())
+            if price < 0:
+                await message.answer("❌ Цена не может быть отрицательной")
+                return
+        except ValueError:
+            await message.answer("❌ Цена должна быть целым числом")
+            return
+
+        await state.update_data(
+            gift_name=name,
+            gift_chance=chance,
+            gift_fake_chance=fake_chance,
+            gift_price=price
+        )
+        await state.set_state(GiftCreateState.waiting_for_gift_photo)
+
+        await message.answer(
+            "✅ Данные приняты!\n"
+            f"Название: {name}\n"
+            f"Шанс: {chance}\n"
+            f"Фейковый шанс: {fake_chance}\n"
+            f"Цена: {price}\n\n"
+            "Теперь отправьте иконку для подарка (изображение)"
+        )
+    except ValueError:
+        await message.answer("❌ Шанс, фейковый шанс и цена должны быть числами (например: 0.3, 0.7 и 150)")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {e}")
+        await state.clear()
+
+
+@router.message(GiftCreateState.waiting_for_gift_photo)
+async def handle_gift_create_photo(message: Message, state: FSMContext):
+    from db import create_gift, get_gifts_by_case
+    try:
+        data = await state.get_data()
+        case_id = data['case_id']
+        name = data['gift_name']
+        chance = data['gift_chance']
+        fake_chance = data["gift_fake_chance"]
+        price = data["gift_price"]
+
+        # Определяем путь к иконке в зависимости от цены
+        if price == 0:
+            icon_path = "media/failed.png"
+        else:
+            icon_path = None
+
+        if message.photo:
+            # Если цена не 0, обрабатываем фото как обычно
+            if price != 0:
+                photo = message.photo[-1]
+                photo_file = await message.bot.get_file(photo.file_id)
+                photo_bytes = await message.bot.download_file(photo_file.file_path)
+
+                # Create unique gift ID
+                gifts = await get_gifts_by_case(case_id)
+                gift_id = f"gift-{len(gifts) + 1}-{random.randint(1000, 9999)}"
+
+                input_path = f"temp_{gift_id}.png"
+                output_path = f"media/gifts/{gift_id}.png"
+                with open(input_path, "wb") as f:
+                    f.write(photo_bytes.read())
+
+                await message.answer("⏳ Обрабатываю изображение (удаляю фон)...")
+
+                processed_image = remove_background(Image.open(input_path))
+                processed_image.save(output_path)
+                icon_path = output_path
+
+                if os.path.exists(input_path):
+                    os.remove(input_path)
+            else:
+                # Если цена 0, игнорируем фото и используем failed.png
+                gifts = await get_gifts_by_case(case_id)
+                gift_id = f"gift-{len(gifts) + 1}-{random.randint(1000, 9999)}"
+                await message.answer("⚠️ Цена подарка 0, используется иконка failed.png (фото проигнорировано)")
+        else:
+            await message.answer("❌ Пожалуйста, отправьте изображение")
+            return
+
+        # Создаем подарок в базе данных
+        await create_gift(
+            gift_id,
+            case_id,
+            name,
+            "https://example.com/gift",  # Default link, can be changed later
+            icon_path,
+            chance,
+            fake_chance,
+            price
+        )
+
+        # Update case icon
+        case = await get_case_by_id(case_id)
+        if case:
+            await update_case_icon(case)
+            # Update case logo in database
+            from db import update_case
+            await update_case(case_id, logo=case.get('logo'))
+
+        if price == 0:
+            await message.answer("✅ Подарок создан! Использована иконка failed.png (цена 0)")
+        else:
+            await message.answer("✅ Подарок успешно создан!")
+
+    except Exception as e:
+        await message.answer(f"❌ Ошибка при создании подарка: {e}")
+    finally:
+        await state.clear()
 
 
 @router.callback_query(F.data.startswith("gift_edit_"))
