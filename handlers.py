@@ -314,11 +314,26 @@ async def handle_case_confirm_delete(callback: CallbackQuery):
 async def handle_case_create(callback: CallbackQuery):
     from db import create_case
     cases = await load_cases()
-    new_case_id = f"case-{len(cases) + 1}"
+
+    # Find the maximum case number to avoid duplicate IDs
+    max_case_num = 0
+    for case in cases:
+        case_id = case.get('id', '')
+        if case_id.startswith('case-'):
+            try:
+                case_num = int(case_id.split('-')[1])
+                max_case_num = max(max_case_num, case_num)
+            except (ValueError, IndexError):
+                # Skip cases with invalid ID format
+                pass
+
+    new_case_num = max_case_num + 1
+    new_case_id = f"case-{new_case_num}"
+
     await create_case(
         new_case_id,
         "basic",
-        f"Новый кейс {len(cases) + 1}",
+        f"Новый кейс {new_case_num}",
         100,
         "/media/default.png",
         False
