@@ -176,12 +176,20 @@ async def update_user_balance(user_id, amount):
 # ===== CASES CRUD =====
 async def create_case(case_id, category, name, price, logo=None, published=False):
     """Create a new case in the database"""
-    conn = await asyncpg.connect(**DB_CONFIG)
-    await conn.execute(
-        "INSERT INTO cases (id, category, name, price, logo, published) VALUES ($1, $2, $3, $4, $5, $6)",
-        case_id, category, name, price, logo, published
-    )
-    await conn.close()
+    conn = None
+    try:
+        conn = await asyncpg.connect(**DB_CONFIG)
+        await conn.execute(
+            "INSERT INTO cases (id, category, name, price, logo, published) VALUES ($1, $2, $3, $4, $5, $6)",
+            case_id, category, name, price, logo, published
+        )
+        print(f"✅ Case created successfully: {case_id} (published={published})")
+    except Exception as e:
+        print(f"❌ Error creating case {case_id}: {e}")
+        raise
+    finally:
+        if conn:
+            await conn.close()
 
     # Update cheapest case cache if the new case is published
     if published:

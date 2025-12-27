@@ -362,13 +362,14 @@ async def handle_case_create_info(message: Message, state: FSMContext):
         new_case_id = f"case-{new_case_num}"
 
         # Create the case with user-provided data
+        # Published by default so it appears on the cases page immediately
         await create_case(
             new_case_id,
             category,
             name,
             price,
             "/media/default.png",
-            False
+            True  # Changed from False to True - cases are now published by default
         )
 
         await message.answer("✅ Новый кейс создан!")
@@ -376,9 +377,12 @@ async def handle_case_create_info(message: Message, state: FSMContext):
         # Show the newly created case details
         case = await get_case_by_id(new_case_id)
         if not case:
+            print(f"❌ Failed to retrieve case {new_case_id} after creation")
             await message.answer("❌ Ошибка при создании кейса")
             await state.clear()
             return
+
+        print(f"✅ Case {new_case_id} retrieved successfully and will be shown to user")
 
         # Определяем текст для кнопки (если уже опубликован — пишем, что опубликован)
         publish_btn_text = "📢 Опубликовать кейс" if not case.get("published", False) else "✅ Кейс опубликован"
