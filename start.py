@@ -26,6 +26,9 @@ load_dotenv()
 app = FastAPI(title="Gifts App API")
 templates = Jinja2Templates(directory="templates")
 
+# Cache for the cheapest published case ID
+_cheapest_case_id_cache = None
+
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
@@ -41,6 +44,38 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
 # --- Вспомогательные функции ---
+async def update_cheapest_case_cache():
+    """
+    Update the cache with the ID of the cheapest published case.
+    This function should be called when cases are created, updated, or published.
+    """
+    global _cheapest_case_id_cache
+    from db import get_all_cases
+    try:
+        cases = await get_all_cases(published_only=True)
+        if not cases:
+            _cheapest_case_id_cache = None
+            return None
+
+        # Find the cheapest case by price
+        cheapest_case = min(cases, key=lambda c: c.get('price', float('inf')))
+        _cheapest_case_id_cache = cheapest_case['id']
+        return _cheapest_case_id_cache
+    except Exception as e:
+        print(f"Ошибка обновления кэша самого дешевого кейса: {e}")
+        _cheapest_case_id_cache = None
+        return None
+
+async def get_cheapest_case_id():
+    """
+    Get the ID of the cheapest published case.
+    Uses cached value if available, otherwise updates the cache.
+    """
+    global _cheapest_case_id_cache
+    if _cheapest_case_id_cache is None:
+        await update_cheapest_case_cache()
+    return _cheapest_case_id_cache
+
 async def load_cases_data():
     """Load published cases from database"""
     from db import get_all_cases
@@ -213,15 +248,10 @@ async def serve_main(request: Request):
         else:
             raise HTTPException(status_code=404, detail="Case not found")
     else:
-        # Get the cheapest published case
-        from db import get_all_cases
-        cases = await get_all_cases(published_only=True)
-        if not cases:
+        # Get the cheapest published case from cache
+        cheapest_case_id = await get_cheapest_case_id()
+        if not cheapest_case_id:
             raise HTTPException(status_code=404, detail="No published cases found")
-
-        # Find the cheapest case by price
-        cheapest_case = min(cases, key=lambda c: c.get('price', float('inf')))
-        cheapest_case_id = cheapest_case['id']
 
         data = await get_case_complete_data(cheapest_case_id)
         if data:
@@ -500,6 +530,14 @@ async def run_server():
 async def main():
     # Запускаем сервер и бота параллельно
     try:
+        # Initialize the cheapest case cache callback
+        import db
+        db._update_cheapest_case_cache_callback = update_cheapest_case_cache
+
+        # Initialize the cache on startup
+        await update_cheapest_case_cache()
+        print(f"Инициализирован кэш самого дешевого кейса: {_cheapest_case_id_cache}")
+
         server_task = asyncio.create_task(run_server())
         bot_task = asyncio.create_task(bot_main())
 

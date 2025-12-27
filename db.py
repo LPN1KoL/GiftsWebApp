@@ -10,6 +10,18 @@ DB_CONFIG = {
     "port": 5432
 }
 
+# Reference to the cache update function from start.py
+# This will be set by start.py on initialization to avoid circular imports
+_update_cheapest_case_cache_callback = None
+
+async def _update_cheapest_case_cache_if_available():
+    """Helper to update cache if callback is set"""
+    if _update_cheapest_case_cache_callback:
+        try:
+            await _update_cheapest_case_cache_callback()
+        except Exception as e:
+            print(f"Ошибка при обновлении кэша: {e}")
+
 # ===== СИНХРОННЫЕ ОБЁРТКИ =====
 def get_user_balance_sync(user_id):
     return asyncio.run(get_user_balance(user_id))
@@ -171,6 +183,10 @@ async def create_case(case_id, category, name, price, logo=None, published=False
     )
     await conn.close()
 
+    # Update cheapest case cache if the new case is published
+    if published:
+        await _update_cheapest_case_cache_if_available()
+
 async def get_case(case_id):
     """Get a case by ID"""
     conn = await asyncpg.connect(**DB_CONFIG)
@@ -203,11 +219,18 @@ async def update_case(case_id, **kwargs):
         await conn.execute(query, *values)
     await conn.close()
 
+    # Update cheapest case cache if price or published status changed
+    if 'price' in kwargs or 'published' in kwargs:
+        await _update_cheapest_case_cache_if_available()
+
 async def delete_case(case_id):
     """Delete a case (gifts are deleted automatically due to CASCADE)"""
     conn = await asyncpg.connect(**DB_CONFIG)
     await conn.execute("DELETE FROM cases WHERE id = $1", case_id)
     await conn.close()
+
+    # Update cheapest case cache since a case was deleted
+    await _update_cheapest_case_cache_if_available()
 
 # ===== GIFTS CRUD =====
 async def create_gift(gift_id, case_id, name, link, img, chance, fake_chance, price):
