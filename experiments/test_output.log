@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/gh-issue-solver-1766838291210/experiments/test_case_creation.py", line 14, in <module>
+    from db import create_case, get_case, get_all_cases, delete_case, init_db
+  File "/tmp/gh-issue-solver-1766838291210/db.py", line 1, in <module>
+    import asyncpg
+ModuleNotFoundError: No module named 'asyncpg'
