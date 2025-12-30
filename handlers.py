@@ -362,14 +362,14 @@ async def handle_case_create_info(message: Message, state: FSMContext):
         new_case_id = f"case-{new_case_num}"
 
         # Create the case with user-provided data
-        # Published by default so it appears on the cases page immediately
+        # Cases are created as unpublished by default and must be explicitly published
         await create_case(
             new_case_id,
             category,
             name,
             price,
             "/media/default.png",
-            True  # Changed from False to True - cases are now published by default
+            False  # Cases are unpublished by default
         )
 
         await message.answer("✅ Новый кейс создан!")
